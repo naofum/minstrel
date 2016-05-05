@@ -1,7 +1,7 @@
 #!/bin/bash
 
 SRC="src_minstrel"
-ID="it.readbeyond.minstrel"
+ID="com.github.naofum.minstrel"
 NAME="Minstrel"
 DIR="minstrel"
 

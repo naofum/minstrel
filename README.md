@@ -1,12 +1,12 @@
-# Minstrel 
+# Minstrel J
 
-**Minstrel** is a FLOSS hybrid reading app specifically designed for Audio-eBooks
+**Minstrel J** is a FLOSS hybrid reading app specifically designed for Audio-eBooks
 
-* Version: 3.0.1
-* Date: 2015-05-21
-* Developed by: [ReadBeyond][rb]
+* Version: 3.0.1J (Japanese Edition)
+* Date: 2016-05-05
+* Developed by: [ReadBeyond][rb] (modified by naofum)
 * Lead Developer: [Alberto Pettarin][ap]
-* License: the MIT License (MIT)
+* License: GPL Version 3
 * Web Page: [Minstrel][webpage]
 * Contact: [minstrel@readbeyond.it](mailto:minstrel@readbeyond.it)
 
@@ -17,9 +17,8 @@ you can download [**Menestrello**][menestrello],
 the official stable release of **Minstrel**
 maintained by ReadBeyond, using:
 
-1. [App Store][appstore] (iPhone/iPad)
-2. [Google Play][googleplay] (Android devices)
-3. [Android APK][apk] (Android devices, manual installation)
+1. [Google Play][googleplay] (Android devices)
+2. [Android APK][apk] (Android devices, manual installation)
 
 
 ## Developing the App
@@ -109,6 +108,7 @@ You can help us by
 * Ignore book CSS, user-provided CSS overrules
 * Enable/disable Javascript execution
 * Presentation mode and image info in CBZ, M3U support in ABZ
+* IPA Mincho font (Japanese Edition)
 
 
 ## Limitations/Missing Features/TODO List
@@ -204,7 +204,7 @@ to file a bug report.
 
 ### License
 
-**Minstrel** is released under the terms of the MIT License (MIT).
+**Minstrel J** is released under the terms of the GPLv3.
 See the [LICENSE](LICENSE) file for details.
 
 
@@ -359,6 +359,14 @@ Web: [http://dev.vinux-project.org/sonic/][sonic]
 
 This app includes `sprintf.js` code by Ash Searle, released under the terms of the "This code is unrestricted: you are free to use it however you like." license.
 
+#### Admob Plugin Pro
+
+This app includes `Admob Plugin Pro` code by Raymond Xie, released under the terms of the MIT License.
+
+#### IPA Font
+
+This app includes `IPA Font` by IPA, released under the terms of the IPA Font License.
+
 
 
 
@@ -393,4 +401,5 @@ This app includes `sprintf.js` code by Ash Searle, released under the terms of t
 [roboto]: http://www.google.com/fonts/specimen/Roboto
 [sil_ofl_fonts]: http://scripts.sil.org/OFL
 [sonic]: http://dev.vinux-project.org/sonic/
+[admob_plugin]: https://github.com/floatinghotpot/cordova-admob-pro
 

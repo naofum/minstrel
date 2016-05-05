@@ -258,7 +258,7 @@ RB.Localization.LocalizedStrings.en = {
     'optPreferencesDialogSpeed': 'スピード',
     'optPreferencesDialogVolume': '音量',
     'optPreferencesDialogBrightness': '輝度',
-    'optPreferencesDialogFontLabels': ['Sans Serif', 'Serif', 'Gentium', 'Charis SIL', 'EB Garamond', 'OpenDyslexic', 'Andika', 'Avería Serif', 'Amaranth', 'Volkhov', 'TestMe Sans', 'TestMe Serif', 'Roboto', 'Roboto Condensed'],
+    'optPreferencesDialogFontLabels': ['Sans Serif', 'Serif', 'Gentium', 'IPA Mincho', 'Charis SIL', 'EB Garamond', 'OpenDyslexic', 'Andika', 'Avería Serif', 'Amaranth', 'Volkhov', 'TestMe Sans', 'TestMe Serif', 'Roboto', 'Roboto Condensed'],
     'optPreferencesDialogTextAlignLabels': ['自動', '均等割付', '左', '中央', '右'],
     'optPreferencesDialogTextTransformLabels': ['自動', '大文字', '小文字'],
     'optPreferencesDialogFontSizeLabels': ['8px', '9px', '10px', '11px', '12px', '13px', '14px', '15px', '16px', '17px', '18px', '19px', '20px', '22px', '24px', '26px', '28px', '30px', '32px', '34px', '36px', '38px', '40px', '44px', '48px', '52px', '60px', '72px'],

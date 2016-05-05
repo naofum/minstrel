@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
 <widget
-    id="it.readbeyond.minstrel"
+    id="com.github.naofum.minstrel"
     version="3.0.1"
     android-versionCode="30001"
     ios-CFBundleVersion="3.0.1"

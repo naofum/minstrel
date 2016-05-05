@@ -197,6 +197,7 @@ RB.Config.EPUBReader.customCSSFileNameDark          = 'custom.night.css';     //
 RB.Config.EPUBReader.availableFontFamilies          = [ "sans-serif",         // system sans-serif
                                                         "serif",              // system serif
                                                         "'gentium'",          // see font.css, note the single quote chars
+                                                        "'ipamincho'",
                                                         "'charis'",
                                                         "'ebgaramond'",
                                                         "'opendyslexic'",

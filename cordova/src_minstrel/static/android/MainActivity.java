@@ -14,7 +14,7 @@
 // Status:      Production
 //
 
-package it.readbeyond.minstrel;
+package com.github.naofum.minstrel;
 
 import android.os.Bundle;
 import org.apache.cordova.*;
