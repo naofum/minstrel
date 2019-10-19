@@ -20,6 +20,8 @@ import android.os.Bundle;
 import org.apache.cordova.*;
 
 // prevent the screen from sleeping
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.view.WindowManager;
 import android.view.Window;
 
@@ -39,6 +41,8 @@ import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.text.format.Time;
 import android.widget.Toast;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -96,7 +100,22 @@ public class MainActivity extends CordovaActivity
     @Override
     public void onCreate(Bundle savedInstanceState)
     {
-        super.onCreate(savedInstanceState);
+        if (Build.VERSION.SDK_INT >= 23) {
+            if (ContextCompat.checkSelfPermission(this,
+                    android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                    != PackageManager.PERMISSION_GRANTED
+                    || ContextCompat.checkSelfPermission(this,
+                    android.Manifest.permission.READ_EXTERNAL_STORAGE)
+                    != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this,
+                        new String[]{
+                                android.Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                                android.Manifest.permission.READ_EXTERNAL_STORAGE},
+                        1);
+            }
+        }
+
+    	super.onCreate(savedInstanceState);
       
         // create download manager 
         downloadManager = (DownloadManager)getSystemService(Context.DOWNLOAD_SERVICE);

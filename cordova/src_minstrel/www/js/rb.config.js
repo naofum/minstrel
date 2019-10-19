@@ -173,6 +173,7 @@ RB.Config.UI.availableLanguages                     = [ 'da',
                                                         'es',
                                                         'fr',
                                                         'it',
+                                                        'ja',
                                                         'pl',
                                                         'tr' ];
 
@@ -467,7 +468,7 @@ RB.Config.defaultValues                                                         
 RB.Config.defaultValues[RB.Storage.Keys.SCAN_DIR]                               = 'single';
 RB.Config.defaultValues[RB.Storage.Keys.MEDIAPLAYER_MODE]                       = '1';
 RB.Config.defaultValues[RB.Storage.Keys.MEDIAPLAYER_ENABLE_PLAYBACK_SPEED]      = false;
-RB.Config.defaultValues[RB.Storage.Keys.UI_LANGUAGE]                            = 'en';
+RB.Config.defaultValues[RB.Storage.Keys.UI_LANGUAGE]                            = 'ja';
 RB.Config.defaultValues[RB.Storage.Keys.UI_NIGHT_MODE]                          = false;
 RB.Config.defaultValues[RB.Storage.Keys.UI_FONT]                                = 'Roboto';
 RB.Config.defaultValues[RB.Storage.Keys.UI_ORIENTATION]                         = 'auto';

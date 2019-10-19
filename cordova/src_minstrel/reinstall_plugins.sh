@@ -15,6 +15,9 @@ cordova plugin add ../src_plugins/readbeyond-plugin-mediarb
 cordova plugin remove readbeyond-plugin-unzipper
 cordova plugin add ../src_plugins/readbeyond-plugin-unzipper
 
-cordova plugin remove cordova-plugin-admobpro
-cordova plugin add cordova-plugin-admobpro
+cordova plugin remove cordova-plugin-android-permissions
+cordova plugin add ../src_plugins/cordova-plugin-android-permissions
+
+#cordova plugin remove cordova-plugin-admobpro
+#cordova plugin add cordova-plugin-admobpro
 

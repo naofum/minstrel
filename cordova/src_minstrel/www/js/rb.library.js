@@ -101,15 +101,15 @@ RB.Library.initializePage = function() {
     //
     RB.Library.getFilesystemInfo();
 
-    var admobid = {};
-    admobid = {
-        banner: 'ca-app-pub-9209419102968336/1565302004',
-        interstitial: ''
-    };
-    if(AdMob) AdMob.createBanner({
-        adId: admobid.banner,
-        position: AdMob.AD_POSITION.BOTTOM_CENTER,
-        autoShow: true });
+//    var admobid = {};
+//    admobid = {
+//        banner: 'ca-app-pub-9209419102968336/1565302004',
+//        interstitial: ''
+//    };
+//    if(AdMob) AdMob.createBanner({
+//        adId: admobid.banner,
+//        position: AdMob.AD_POSITION.BOTTOM_CENTER,
+//        autoShow: true });
 };
 
 // bind events

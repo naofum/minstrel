@@ -1,8 +1,8 @@
 <?xml version='1.0' encoding='utf-8'?>
 <widget
     id="com.github.naofum.minstrel"
-    version="3.0.1"
-    android-versionCode="30001"
+    version="3.0.1.a"
+    android-versionCode="300020"
     ios-CFBundleVersion="3.0.1"
     xmlns="http://www.w3.org/ns/widgets"
     xmlns:cdv="http://cordova.apache.org/ns/1.0">
@@ -150,8 +150,8 @@
     <preference name="LogLevel"                         value="INFO" />
     <preference name="AndroidLaunchMode"                value="singleTask" />
     <preference name="DefaultVolumeStream"              value="media" />
-    <preference name="android-minSdkVersion"            value="14" />
-    <preference name="android-targetSdkVersion"         value="22" />
+    <preference name="android-minSdkVersion"            value="19" />
+    <preference name="android-targetSdkVersion"         value="28" />
     <preference name="android-installLocation"          value="auto" /> 
 
     <!-- legacy / not documented / from PhoneGap -->

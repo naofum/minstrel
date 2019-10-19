@@ -26,7 +26,7 @@ maintained by ReadBeyond, using:
 ### System Requirements
 
 1. [Android SDK][androidsdk] (Android) and/or [Xcode][xcode] (iOS)
-2. [Apache Cordova 5.0.0][cordova]
+2. [Apache Cordova 8.0.0][cordova]
 
 If you want to build the Android APK from command line,
 make sure the Android SDK is in your `$PATH`
