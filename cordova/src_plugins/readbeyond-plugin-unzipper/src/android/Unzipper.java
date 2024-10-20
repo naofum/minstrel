@@ -16,6 +16,8 @@
 
 package it.readbeyond.minstrel.unzipper;
 
+import android.net.Uri;
+
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaPlugin;
 import org.json.JSONObject;
@@ -27,6 +29,8 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -34,6 +38,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+import java.util.zip.ZipInputStream;
 
 public class Unzipper extends CordovaPlugin {
    
@@ -54,7 +59,7 @@ public class Unzipper extends CordovaPlugin {
     public static final String ARGUMENT_MODE_SELECTED           = "selected";
    
     public static final long DEFAULT_MAXIMUM_SIZE_FILE          = 4194304;  // 4 MB
-    public static final int  BUFFER_SIZE                        = 4096;     // unzip in chunks of 4 KB
+    public static final int  BUFFER_SIZE                        = 64 * 1024;  // unzip in chunks of 4 KB
 
     @Override
     public boolean execute(String action, final JSONArray args, final CallbackContext callbackContext) throws JSONException {
@@ -95,8 +100,33 @@ public class Unzipper extends CordovaPlugin {
         });
         return true;
     }
-   
+
     private String list(String inputZip) throws IOException, JSONException {
+        // list all files
+        List<String> acc = new ArrayList<String>();
+        try (InputStream input = new BufferedInputStream(cordova.getContext().getContentResolver().openInputStream(Uri.parse(inputZip)), BUFFER_SIZE)) {
+            ZipInputStream zipFile = null;
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+                zipFile = new ZipInputStream(input, Charset.forName("MS932"));
+            } else {
+                zipFile = new ZipInputStream(input);
+            }
+            ZipEntry zipEntry = zipFile.getNextEntry();
+            while (zipEntry != null) {
+                acc.add(zipEntry.getName());
+                zipEntry = zipFile.getNextEntry();
+            }
+            zipFile.close();
+        }
+
+        // sort
+        Collections.sort(acc);
+
+        // return JSON string
+        return stringify(acc);
+    }
+
+    private String listFile(String inputZip) throws IOException, JSONException {
         // list all files
         List<String> acc = new ArrayList<String>();
         File sourceZipFile = new File(inputZip);
@@ -114,7 +144,124 @@ public class Unzipper extends CordovaPlugin {
         return stringify(acc);
     }
 
-	private String unzip(String inputZip, String destinationDirectory, String mode, JSONObject parameters) throws IOException, JSONException {
+    private String unzip(String inputZip, String destinationDirectory, String mode, JSONObject parameters) throws IOException, JSONException {
+
+        if (inputZip.startsWith("/content:")) {
+            inputZip = inputZip.replace("/content:", "content:/");
+        }
+
+        // store the zip entries actually decompressed
+        List<String> decompressed = new ArrayList<String>();
+
+        // open input zip file
+        try (InputStream input = new BufferedInputStream(cordova.getContext().getContentResolver().openInputStream(Uri.parse(inputZip)), BUFFER_SIZE)) {
+            ZipInputStream zipFile = null;
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+                zipFile = new ZipInputStream(input, Charset.forName("MS932"));
+            } else {
+                zipFile = new ZipInputStream(input);
+            }
+            ZipEntry zipEntry = zipFile.getNextEntry();
+
+            // open destination directory, creating it if needed
+            File unzipDestinationDirectory = new File(destinationDirectory);
+            unzipDestinationDirectory.mkdirs();
+
+            String[] excludeExtensions = null;
+            if (parameters.optJSONArray(ARGUMENT_ARGS_EXCLUDE_EXTENSIONS) != null) {
+                excludeExtensions = JSONArrayToStringArray(parameters.optJSONArray(ARGUMENT_ARGS_EXCLUDE_EXTENSIONS));
+            }
+            long maximum_size = parameters.optLong(ARGUMENT_ARGS_MAXIMUM_FILE_SIZE, DEFAULT_MAXIMUM_SIZE_FILE);
+            String[] entries = null;
+            try {
+                entries = JSONArrayToStringArray(parameters.optJSONArray(ARGUMENT_ARGS_ENTRIES));
+            } catch (NullPointerException e) {
+                //
+            }
+            String[] extensions = null;
+            try {
+                extensions = JSONArrayToStringArray(parameters.optJSONArray(ARGUMENT_ARGS_EXTENSIONS));
+            } catch (NullPointerException e) {
+                //
+            }
+
+            while (zipEntry != null) {
+                boolean target = false;
+                String name  = zipEntry.getName();
+                String lower = name.toLowerCase();
+                // extract all files
+                if (mode.equals(ARGUMENT_MODE_ALL)) {
+                    target = true;
+                }
+
+                // extract all files except audio and video
+                // (determined by file extension)
+                if (mode.equals(ARGUMENT_MODE_ALL_NON_MEDIA)) {
+                    if (!isFile(lower, excludeExtensions)) {
+                        target = true;
+                    }
+                }
+
+                // extract all small files
+                // maximum size is passed in args parameter
+                // or, if not passed, defaults to const DEFAULT_MAXIMUM_SIZE_FILE
+                if (mode.equals(ARGUMENT_MODE_ALL_SMALL)) {
+                    if (zipEntry.getSize() <= maximum_size) {
+                        target = true;
+                    }
+                }
+
+                // extract only the requested files
+                if (mode.equals(ARGUMENT_MODE_SELECTED)) {
+                    for (String entry : entries) {
+                        if (entry.contains(name)) {
+                            target = true;
+                        }
+                    }
+                }
+
+                // extract all "structural" files
+                if (mode.equals(ARGUMENT_MODE_ALL_STRUCTURE)) {
+                    boolean extract = isFile(lower, extensions);
+                    if (extract) {
+                        target = true;
+                    }
+                }
+
+                // NOTE list contains only valid zip entries
+                // perform unzip
+                if (target) {
+                    File destFile = new File(unzipDestinationDirectory, name);
+
+                    File destinationParent = destFile.getParentFile();
+                    destinationParent.mkdirs();
+
+                    if (!zipEntry.isDirectory()) {
+                        BufferedInputStream is = new BufferedInputStream(zipFile);
+                        int numberOfBytesRead;
+                        byte data[] = new byte[BUFFER_SIZE];
+                        FileOutputStream fos = new FileOutputStream(destFile);
+                        BufferedOutputStream dest = new BufferedOutputStream(fos, BUFFER_SIZE);
+                        while ((numberOfBytesRead = is.read(data, 0, BUFFER_SIZE)) > -1) {
+                            dest.write(data, 0, numberOfBytesRead);
+                        }
+                        dest.flush();
+                        dest.close();
+//                        is.close();
+                        fos.close();
+                        decompressed.add(name);
+                    }
+                }
+                zipEntry = zipFile.getNextEntry();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return stringify(decompressed);
+    }
+
+    private String unzipFile(String inputZip, String destinationDirectory, String mode, JSONObject parameters) throws IOException, JSONException {
 
         // store the zip entries to decompress
         List<String> list = new ArrayList<String>();

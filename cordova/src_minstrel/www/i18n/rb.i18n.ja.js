@@ -63,7 +63,7 @@ RB.Localization.LocalizedStrings.ja = {
     'txtHelp': 'Minstrel',
     'btnHelpBack': '戻る',
     'divHelpContent1p1': 'ヘルプ',
-    'divHelpContent1p2': 'Minstrel は、リフロー可能な EPUB3 形式のオーディオ eBook を完全に読書/リスニングするアプリです。Minstrel は ReadBeyond による実験的なプロジェクトです。',
+    'divHelpContent1p2': '吟遊詩人は、リフローの EPUB3 形式のオーディオ eBook を読書/リスニングするアプリです。吟遊詩人は ReadBeyond によるプロジェクトをベースにしています。',
     'divHelpContent2p1': 'ライブラリー表示',
     'divHelpContent2p2': '更新ボタンを押すと、ライブラリーにある EPUB 3 オーディオ eBook を更新/インポートします。',
     'divHelpContent2p3': 'タイトル、作者、ナレーター、期間、言語、最近開いた、形式でブックを並び替えすることができます。',

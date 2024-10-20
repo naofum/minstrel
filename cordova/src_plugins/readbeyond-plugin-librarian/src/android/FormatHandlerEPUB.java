@@ -16,13 +16,17 @@
 
 package it.readbeyond.minstrel.librarian;
 
+import android.os.Build;
 import android.util.Xml;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+import java.util.zip.ZipInputStream;
 
 import org.json.JSONObject;
 import org.xmlpull.v1.XmlPullParser;
@@ -70,6 +74,66 @@ public class FormatHandlerEPUB extends FormatHandlerAbstractZIP {
     public FormatHandlerEPUB() {
         super();
         this.setFormatName(EPUB_FORMAT);
+    }
+
+    public Publication parseZipStream(InputStream input, String file) {
+        Publication p                    = super.parseFile(new File(file));
+        Format format                    = new Format(EPUB_FORMAT);
+        pathThumbnailSourceRelativeToOPF = null;
+        coverManifestItemID              = null;
+
+        String OPFPath                   = null;
+        ZipInputStream zipFile;
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                zipFile = new ZipInputStream(input, Charset.forName("MS932"));
+            } else {
+                zipFile = new ZipInputStream(input);
+            }
+            ZipEntry zipEntry = zipFile.getNextEntry();
+            while (zipEntry != null) {
+                if (zipEntry.getName().endsWith(".opf")) {
+                    OPFPath = zipEntry.getName();
+                    // first pass: parse metadata
+                    parser = Xml.newPullParser();
+                    parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, true);
+                    parser.setInput(new BufferedInputStream(zipFile), null);
+                    parser.nextTag();
+                    this.parsePackage(format);
+
+                    // item is valid
+                    p.isValid(true);
+
+                    // set the cover path, relative to the EPUB container (aka ZIP) root
+//                    if (pathThumbnailSourceRelativeToOPF != null) {
+//                        // concatenate OPFPath parent directory and pathThumbnailSourceRelativeToOPF
+//                        File tmp = new File(new File(OPFPath).getParent(), pathThumbnailSourceRelativeToOPF);
+//                        // remove leading "/"
+//                        format.addMetadatum("internalPathCover", tmp.getAbsolutePath().substring(1));
+//                    }
+                }
+                zipEntry = zipFile.getNextEntry();
+            }
+            zipFile.close();
+        } catch (Exception e) {
+            // invalidate item, so it will not be added to library
+            p.isValid(false);
+        } finally {
+            if (input != null) {
+                try {
+                    input.close();
+                } catch (IOException e) {
+                    //
+                }
+            }
+        }
+
+        p.addFormat(format);
+
+        // extract cover
+//        super.extractCover(file, format, p.getID());
+
+        return p;
     }
 
     public Publication parseFile(File file) {
@@ -235,6 +299,27 @@ public class FormatHandlerEPUB extends FormatHandlerAbstractZIP {
                 } else {
                     skip();
                 }
+            }
+        }
+    }
+
+    // parse package
+    private void parsePackage(Format format) throws XmlPullParserException, IOException {
+        parser.require(XmlPullParser.START_TAG, EPUB_NAMESPACE_OPF, EPUB_OPF_PACKAGE);
+
+        // first pass: metadata
+        while (parser.next() != XmlPullParser.END_TAG) {
+            if (parser.getEventType() != XmlPullParser.START_TAG) {
+                continue;
+            }
+            String name = parser.getName();
+            if (name.equals(EPUB_OPF_METADATA)) {
+                parseMetadata(format);
+            } else if (name.equals(EPUB_OPF_MANIFEST)) {
+                parseManifest(format);
+                return;
+            } else {
+                skip();
             }
         }
     }

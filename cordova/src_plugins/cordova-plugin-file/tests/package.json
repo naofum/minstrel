@@ -1,0 +1,17 @@
+{
+  "name": "cordova-plugin-file-tests",
+  "version": "8.1.1-dev",
+  "description": "",
+  "cordova": {
+    "id": "cordova-plugin-file-tests",
+    "platforms": [
+      "android"
+    ]
+  },
+  "keywords": [
+    "ecosystem:cordova",
+    "cordova-android"
+  ],
+  "author": "",
+  "license": "Apache-2.0"
+}

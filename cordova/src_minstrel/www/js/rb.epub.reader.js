@@ -579,6 +579,9 @@ RB.EPUBReader.onBackButton = function() {
 // exit
 RB.EPUBReader.exit = function() {
     if (RB.EPUBReader.confirmQuit) {
+        var id = RB.EPUBReader.UI.Dialogs.popupQuit;
+        RB.UI.applyCSS(id, 'writing-mode',          'horizontal-tb');
+        RB.UI.applyCSS(id, 'direction',             'ltr');
         RB.UI.openPopup(RB.EPUBReader.UI.Dialogs.popupQuit);
     } else {
         RB.EPUBReader.doExit();
@@ -1920,6 +1923,13 @@ RB.EPUBReader.onDRSUpdate = function(triggeredByKey) {
             RB.UI.applyCSS(id, 'color',             RB.EPUBReader.drs.getValue('EPUB_CONTENT_FONT_COLOR'));
         }
         
+        //TOTO check
+        id = RB.EPUBReader.UI.divHeader;
+        RB.UI.applyCSS(id, 'writing-mode',          'horizontal-tb');
+        RB.UI.applyCSS(id, 'direction',             'ltr');
+        id = RB.EPUBReader.UI.divFooterAll;
+        RB.UI.applyCSS(id, 'writing-mode',          'horizontal-tb');
+        RB.UI.applyCSS(id, 'direction',             'ltr');
         // apply the same settings to extra (footnote) panel
         // TODO refactor
         id = RB.EPUBReader.UI.divFooterExtra;
@@ -2106,7 +2116,8 @@ RB.EPUBReader.panelManager = function(elements) {
         // reader
         id = _elements['reader'];
         RB.UI.applyCSS(id, 'background-color',      'white'); // set later according to user preferences
-        RB.UI.applyCSS(id, 'overflow',              'hidden');
+//        RB.UI.applyCSS(id, 'overflow',              'hidden');
+        RB.UI.applyCSS(id, 'overflow',              'auto');
         
         // container
         id = _elements['container'];
@@ -2115,7 +2126,8 @@ RB.EPUBReader.panelManager = function(elements) {
         RB.UI.applyCSS(id, 'padding',               '0');
         RB.UI.applyCSS(id, 'background-color',      'transparent');
         RB.UI.applyCSS(id, 'position',              'absolute');
-        RB.UI.applyCSS(id, 'overflow',              'hidden');
+//        RB.UI.applyCSS(id, 'overflow',              'hidden');
+        RB.UI.applyCSS(id, 'overflow',              'auto');
         
         // panel 1
         id = _elements['panel1'];
@@ -2124,7 +2136,8 @@ RB.EPUBReader.panelManager = function(elements) {
         RB.UI.applyCSS(id, 'padding',               '0');
         RB.UI.applyCSS(id, 'background-color',      'transparent');
         RB.UI.applyCSS(id, 'position',              'absolute');
-        RB.UI.applyCSS(id, 'overflow-x',            'hidden');
+//        RB.UI.applyCSS(id, 'overflow-x',            'hidden');
+        RB.UI.applyCSS(id, 'overflow-x',            'auto');
         RB.UI.applyCSS(id, 'overflow-y',            'auto');
         
         // panel 1 inner
@@ -2134,7 +2147,8 @@ RB.EPUBReader.panelManager = function(elements) {
         RB.UI.applyCSS(id, 'padding',               '0');
         RB.UI.applyCSS(id, 'background-color',      'transparent');
         RB.UI.applyCSS(id, 'position',              'absolute');
-        RB.UI.applyCSS(id, 'overflow',              'hidden');
+//        RB.UI.applyCSS(id, 'overflow',              'hidden');
+        RB.UI.applyCSS(id, 'overflow',              'auto');
         RB.UI.applyCSS(id, 'width',                 'auto');
         RB.UI.applyCSS(id, 'height',                'auto');
         
@@ -2145,7 +2159,8 @@ RB.EPUBReader.panelManager = function(elements) {
         RB.UI.applyCSS(id, 'padding',               '0');
         RB.UI.applyCSS(id, 'background-color',      'transparent');
         RB.UI.applyCSS(id, 'position',              'relative');
-        RB.UI.applyCSS(id, 'overflow',              'hidden');
+//        RB.UI.applyCSS(id, 'overflow',              'hidden');
+        RB.UI.applyCSS(id, 'overflow',              'auto');
         RB.UI.applyCSS(id, 'width',                 '100%');
         RB.UI.applyCSS(id, 'height',                '100%');
         
@@ -2165,7 +2180,8 @@ RB.EPUBReader.panelManager = function(elements) {
         RB.UI.applyCSS(id, 'padding',               '0');
         RB.UI.applyCSS(id, 'background-color',      'transparent');
         RB.UI.applyCSS(id, 'position',              'absolute');
-        RB.UI.applyCSS(id, 'overflow-x',            'hidden');
+//        RB.UI.applyCSS(id, 'overflow-x',            'hidden');
+        RB.UI.applyCSS(id, 'overflow-x',            'auto');
         RB.UI.applyCSS(id, 'overflow-y',            'auto');
         
         // panel 2 inner
@@ -2175,7 +2191,8 @@ RB.EPUBReader.panelManager = function(elements) {
         RB.UI.applyCSS(id, 'padding',               '0');
         RB.UI.applyCSS(id, 'background-color',      'transparent');
         RB.UI.applyCSS(id, 'position',              'absolute');
-        RB.UI.applyCSS(id, 'overflow',              'hidden');
+//        RB.UI.applyCSS(id, 'overflow',              'hidden');
+        RB.UI.applyCSS(id, 'overflow',              'auto');
         RB.UI.applyCSS(id, 'width',                 'auto');
         RB.UI.applyCSS(id, 'height',                'auto');
         
@@ -2186,7 +2203,8 @@ RB.EPUBReader.panelManager = function(elements) {
         RB.UI.applyCSS(id, 'padding',               '0');
         RB.UI.applyCSS(id, 'background-color',      'transparent');
         RB.UI.applyCSS(id, 'position',              'relative');
-        RB.UI.applyCSS(id, 'overflow',              'hidden');
+//        RB.UI.applyCSS(id, 'overflow',              'hidden');
+        RB.UI.applyCSS(id, 'overflow',              'auto');
         RB.UI.applyCSS(id, 'width',                 '100%');
         RB.UI.applyCSS(id, 'height',                '100%');
         
@@ -2342,7 +2360,8 @@ RB.EPUBReader.panelManager = function(elements) {
             RB.UI.applyCSS(id, 'height',               'auto');
             
             id = _elements['columnpanel1'];
-            RB.UI.applyCSS(id, 'overflow',             'hidden');
+//            RB.UI.applyCSS(id, 'overflow',             'hidden');
+            RB.UI.applyCSS(id, 'overflow',             'auto');
             RB.UI.applyCSS(id, 'width',                '100%');
             RB.UI.applyCSS(id, 'column-width',         '');
             RB.UI.applyCSS(id, 'column-gap',           '');

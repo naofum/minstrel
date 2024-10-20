@@ -8,12 +8,12 @@
 
   <!-- BEGIN AppLinks -->
   <meta property="al:android:app_name" content="Minstrel" />
-  <meta property="al:android:package"  content="it.readbeyond.minstrel" />
+  <meta property="al:android:package"  content="com.github.naofum.minstrel" />
   <meta property="al:android:url"      content="minstrel://library" />
   <meta property="al:ios:app_name"     content="Minstrel" />
   <meta property="al:ios:app_store_id" content="012345678" /><!-- 771746561 -->
   <meta property="al:ios:url"          content="minstrel://library" />
-  <meta property="al:web:url"          content="http://www.readbeyond.it/minstrel" />
+  <meta property="al:web:url"          content="https://ja.osdn.net/projects/fosj/wiki/Minstrel" />
   <!-- END AppLinks -->
 
   <!-- BEGIN nativedroid -->
@@ -51,7 +51,8 @@
   <!-- END logic -->
 
   <!-- BEGIN libraries -->
-  <script type="text/javascript" src="lib/jquery-1.11.3.min.js"></script>
+  <script type="text/javascript" src="lib/jquery-3.7.1.min.js"></script>
+  <script type="text/javascript" src="lib/jquery-migrate-3.5.0.min.js"></script>
   <!-- BEGIN initialize JQM -->
   <!-- This MUST be loaded AFTER jquery but BEFORE jquery.mobile -->
   <script type="text/javascript">
@@ -104,13 +105,29 @@
       // and dim system bar (if on night mode) 
       function onResume() {
           RB.UI.dimSystemBar();
-          RB.Library.checkNewFile();
+//          RB.Library.checkNewFile();
       };
       
       // ready: initialize and then load library
       function onDeviceReady() {
+          checkPermissions();
           RB.Library.initializePage();
-          RB.Library.checkNewFile();
+//          RB.Library.checkNewFile();
+      };
+
+      function checkPermissionSuccess() {
+      };
+      function checkPermissionError(e) {
+        console.error(e);
+      };
+      function checkPermissions() {
+        var permissions = cordova.plugins.permissions;
+        permissions.requestPermissions([permissions.READ_MEDIA_AUDIO, permissions.WRITE_EXTERNAL_STORAGE], checkPermissionSuccess, checkPermissionError);
+        RB.App.cacheDirectory            = null;
+        resolveLocalFileSystemURL(cordova.file.cacheDirectory, function(entry) {
+            RB.App.cacheDirectory = entry.toInternalURL();
+            // "https://localhost/__cdvfile_cache__/"
+        });
       };
   </script>
  </head>

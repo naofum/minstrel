@@ -2,8 +2,8 @@
 
 **Minstrel J** is a FLOSS hybrid reading app specifically designed for Audio-eBooks
 
-* Version: 3.0.1J (Japanese Edition)
-* Date: 2016-05-05
+* Version: 3.0.3J (Japanese Edition)
+* Date: 2024-10-19
 * Developed by: [ReadBeyond][rb] (modified by naofum)
 * Lead Developer: [Alberto Pettarin][ap]
 * License: GPL Version 3
@@ -18,15 +18,14 @@ the official stable release of **Minstrel**
 maintained by ReadBeyond, using:
 
 1. [Google Play][googleplay] (Android devices)
-2. [Android APK][apk] (Android devices, manual installation)
 
 
 ## Developing the App
 
 ### System Requirements
 
-1. [Android SDK][androidsdk] (Android) and/or [Xcode][xcode] (iOS)
-2. [Apache Cordova 8.0.0][cordova]
+1. [Android SDK][androidsdk] (Android)
+2. [Apache Cordova 13.0.0][cordova]
 
 If you want to build the Android APK from command line,
 make sure the Android SDK is in your `$PATH`
@@ -37,21 +36,15 @@ so that `cordova` can run it.
 1. Clone the GitHub repository and enter the `cordova` directory:
     
     ```bash
-    $ git clone https://github.com/readbeyond/minstrel.git
+    $ git clone https://github.com/naofum/minstrel.git
     $ cd minstrel/cordova
     ```
 
 2. Create the Cordova project directory:
    
     ```bash
-    $ bash create_minstrel.sh
-    or
     $ bash create_minstrel.sh android
-    $ bash create_minstrel.sh ios
     ```
-
-   The first command will create both versions of the app,
-   the last two commands will create only the specified version.
 
 3. Build the Android version:
     
@@ -61,14 +54,6 @@ so that `cordova` can run it.
     ```
 
     will build the app and copy the generated APK into `/tmp/`.
-
-4. Build the iOS version:
-
-    ```bash
-    $ open minstrel/platforms/ios/Minstrel.xcodeproj
-    ```
-    
-    will open the generated project in Xcode.
 
 
 ## Documentation
@@ -88,7 +73,7 @@ You can help us by
 ## Features
 
 * Supported formats: EPUB 2, EPUB 3 (reflowable and pre-paginated), CBZ, ABZ (more can be added easily)
-* Multilingual UI: EN, IT, DA, FR, DE, PL, ES, TR
+* Multilingual UI: EN, IT, DA, FR, DE, PL, ES, TR, JA
 * Import documents from: browser, Download Manager, Notifications, or the file system (Android); Safari and iTunes (iOS)
 * Library sorted by: author, title, narrator, duration, language, series, or recently open
 * Library titles can be filtered
@@ -159,7 +144,7 @@ We are open to accept sponsorships to
 * hire an UI designer to redesign the app, and
 * improve the documentation.
 
-Feel free to [get in touch](mailto:minstrel@readbeyond.it).
+Feel free to [get in touch](mailto:naofum@gmail.com).
 
 ### Contributing
 
@@ -196,7 +181,7 @@ to the code you contribute.**
 
 If you think you found a bug,
 please use the
-[GitHub issue tracker](https://github.com/readbeyond/minstrel/issues)
+[GitHub issue tracker](https://github.com/naofum/minstrel/issues)
 to file a bug report.
 
 
@@ -211,7 +196,7 @@ See the [LICENSE](LICENSE) file for details.
 ### Privacy Policy
 
 We value your privacy as much as we value ours.
-ReadBeyond does not collect any data about your eBooks,
+We does not collect any data about your eBooks,
 reading preferences, or reading statistics.
 On Android, the Network connection permission is requested solely
 because Minstrel uses a WebView ("in-app browser") to render the eBooks,
@@ -271,6 +256,13 @@ Copyright © 2010, 2011, 2012 Georg Duffner (http://www.georgduffner.at). This F
 Web: [http://scripts.sil.org/OFL][sil_ofl_fonts]
 
 
+#### IPA Font
+
+Copyright © CITPC (https://moji.or.jp/ipafont). This Font Software is licensed under the IPA Font License, Version 1.0.
+
+Web: [https://moji.or.jp/ipafont/license/][ipa_fonts]
+
+
 #### OpenDyslexic Font
 
 Copying is an act of love. Please copy. OpenDyslexic(open-dyslexic) by Abelardo Gonzalez is licensed under a Creative Commons Attribution 3.0 Unported License. Based on a work at dyslexicfonts.com.
@@ -303,7 +295,7 @@ Web: [http://scripts.sil.org/OFL][sil_ofl_fonts]
 
 #### Apache Cordova
 
-This app has been compiled using `Apache Cordova 5.0.0` by the Apache Software Foundation, released under the terms of the Apache License, Version 2.0.
+This app has been compiled using `Apache Cordova 13.0.0` by the Apache Software Foundation, released under the terms of the Apache License, Version 2.0.
 
 Web: [http://cordova.apache.org/][cordova]
 
@@ -327,7 +319,7 @@ Web: [https://github.com/EightMedia/hammer.js][hammer]
 
 #### jQuery
 
-This app includes `jQuery 1.9.1` code by the jQuery Foundation, released under the terms of the MIT License.
+This app includes `jQuery 3.7.1` code by the jQuery Foundation, released under the terms of the MIT License.
 
 Web: [https://jquery.org/][jquery]
 
@@ -383,8 +375,7 @@ This app includes `IPA Font` by IPA, released under the terms of the IPA Font Li
 [rb]: http://www.readbeyond.it/
 [ap]: http://www.albertopettarin.it/
 [webpage]: http://www.readbeyond.it/minstrel/
-[appstore]: https://itunes.apple.com/us/app/menestrello/id771746561
-[googleplay]: https://play.google.com/store/apps/details?id=it.readbeyond.menestrello
+[googleplay]: https://play.google.com/store/apps/details?id=com.github.naofum.menestrello
 [menestrello]: http://www.readbeyond.it/menestrello/
 [apk]: http://www.readbeyond.it/menestrello/
 [androidsdk]: https://developer.android.com/sdk/
@@ -400,6 +391,6 @@ This app includes `IPA Font` by IPA, released under the terms of the IPA Font Li
 [open_dyslexic_font]: http://opendyslexic.org/
 [roboto]: http://www.google.com/fonts/specimen/Roboto
 [sil_ofl_fonts]: http://scripts.sil.org/OFL
+[ipa_fonts]: https://moji.or.jp/ipafont/license/
 [sonic]: http://dev.vinux-project.org/sonic/
-[admob_plugin]: https://github.com/floatinghotpot/cordova-admob-pro
 

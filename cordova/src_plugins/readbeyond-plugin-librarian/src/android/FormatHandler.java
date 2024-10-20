@@ -17,6 +17,9 @@
 package it.readbeyond.minstrel.librarian;
 
 import java.io.File;
+import java.io.InputStream;
+
+import org.apache.cordova.CordovaInterface;
 import org.json.JSONObject;
 
 public interface FormatHandler { 
@@ -35,6 +38,9 @@ public interface FormatHandler {
     // return the parsed Publication out of the given file
     public Publication parseFile(File file);
 
+    // return the parsed Publication out of the given file
+    public Publication parseZipStream(InputStream input, String file);
+
     // perform a custom action
-    public String customAction(String path, JSONObject parameters);
+    public String customAction(String path, JSONObject parameters, CordovaInterface cordova);
 }

@@ -477,7 +477,7 @@ RB.Library.initializationCompleted = function(message) {
                 
                 if (RB.App.isAndroid()) {
                     // show dialog
-                    RB.Library.showScanStorageDialog();
+//                    RB.Library.showScanStorageDialog();
                 }
                 if (RB.App.isIOS()) {
                     // just refresh

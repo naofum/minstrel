@@ -153,7 +153,7 @@ public class Commander extends CordovaPlugin {
                         
                         // delete file or directory, where option is the path relative to external storage 
                         if (commandName.equals(COMMAND_DELETE_RELATIVE)) {
-                            delete(new File(Environment.getExternalStorageDirectory(), parameters.optString("path", null)), callbackContext);
+                            delete(new File(cordova.getContext().getCacheDir(), parameters.optString("path", null)), callbackContext);
                         }
                         
                         // delete file or directory, where option is the absolute path in the file system
@@ -295,7 +295,7 @@ public class Commander extends CordovaPlugin {
         String[] storagePaths = Storage.getStoragePaths();
         if ((storagePaths == null) || (storagePaths.length < 1)) {
             storagePaths    = new String[1];
-            storagePaths[0] = Environment.getExternalStorageDirectory().getAbsolutePath();
+            storagePaths[0] = cordova.getContext().getCacheDir().getAbsolutePath();
         }
         return storagePaths;
     }
@@ -311,7 +311,7 @@ public class Commander extends CordovaPlugin {
 
     private String getFilesystemInfoJSONString() throws JSONException {
         JSONObject obj = new JSONObject();
-        obj.put("root", Environment.getExternalStorageDirectory().getAbsolutePath());
+        obj.put("root", cordova.getContext().getCacheDir().getAbsolutePath());
         obj.put("separator", File.separator);
         obj.put("documentsDir", ""); // TODO
         obj.put("cacheDir", ""); // TODO
@@ -405,7 +405,7 @@ public class Commander extends CordovaPlugin {
 
     // normalize path
     private String normalizePath(String path) {
-        return this.normalizePath(path, Environment.getExternalStorageDirectory().getAbsolutePath());
+        return this.normalizePath(path, cordova.getContext().getCacheDir().getAbsolutePath());
     }
     private String normalizePath(String path, String base) {
         if ((path.length() > 0) && (path.startsWith(File.separator))) {

@@ -22,14 +22,20 @@ import org.json.JSONObject;
 import org.json.JSONArray;
 import org.json.JSONException;
 
+import android.content.ContentResolver;
+import android.content.ContentUris;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
+import android.provider.MediaStore;
+import android.util.Log;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileFilter;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
-import java.util.Map.Entry;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
@@ -68,6 +74,8 @@ public class Librarian extends CordovaPlugin {
     public static final String   DEFAULT_THUMBNAIL_DIRECTORY              = "minstrel/.thumbnails";
     public static final int      DEFAULT_THUMBNAIL_HEIGHT                 = 400;
     public static final int      DEFAULT_THUMBNAIL_WIDTH                  = 300;
+
+    public static final int  BUFFER_SIZE                                  = 64 * 1024;  // unzip in chunks of 64 KB
 
     @Override
     public boolean execute(String action, final JSONArray args, final CallbackContext callbackContext) throws JSONException {
@@ -184,7 +192,7 @@ public class Librarian extends CordovaPlugin {
                         String jsonString = ""; 
                         FormatHandler fh = getFormatHandler(format);
                         if (fh != null) {
-                            jsonString = fh.customAction(path, parameters);
+                            jsonString = fh.customAction(path, parameters, cordova);
                         }
 
                         // callback
@@ -230,6 +238,61 @@ public class Librarian extends CordovaPlugin {
     }
 
     private void discoverPublications(String storagePath, FormatHandler fh, List<Publication> publications) {
+        Uri collection;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            collection = MediaStore.Files.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY);
+        } else {
+            collection = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
+        }
+        ContentResolver resolver = cordova.getContext().getContentResolver();
+//        String selection = MediaStore.Files.FileColumns.MIME_TYPE + "='application/zip'" +
+//                " OR " + MediaStore.Files.FileColumns.MIME_TYPE + "='application/epub+zip'";
+        String selection = MediaStore.Files.FileColumns.MIME_TYPE + "='application/zip'" +
+                " OR " + MediaStore.Files.FileColumns.MIME_TYPE + "='application/x-cbz'" +
+                " OR " + MediaStore.Files.FileColumns.MIME_TYPE + "='application/vnd.comicbook+zip'" +
+                " OR " + MediaStore.Files.FileColumns.MIME_TYPE + "='application/epub+zip'";
+        try {
+            Cursor cursor = resolver.query(collection, null, selection, null, null);
+            int idColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID);
+            int titleColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE);
+            int columnIndex = cursor.getColumnIndexOrThrow("_data");
+            while (cursor.moveToNext()) {
+                long id = cursor.getLong(idColumn);
+                String title = cursor.getString(titleColumn);
+                String pathOfUri = cursor.getString(columnIndex);
+                Log.i("Librarian", "parse: " + pathOfUri);
+                Uri uri;
+                uri = ContentUris.withAppendedId(collection, id);
+                try {
+                    Publication p = null;
+                    FormatHandler fh1 = null;
+                    if (pathOfUri.toLowerCase().endsWith(".epub") || pathOfUri.toLowerCase().endsWith(".epub.zip")) {
+                        fh1 = getFormatHandler(FORMAT_EPUB);
+                        p = fh1.parseZipStream(new BufferedInputStream(resolver.openInputStream(uri), BUFFER_SIZE), uri.toString());
+                    } else if (pathOfUri.toLowerCase().endsWith(".cbz") || pathOfUri.toLowerCase().endsWith(".cbz.zip")) {
+                        fh1 = getFormatHandler(FORMAT_CBZ);
+                        p = fh1.parseZipStream(new BufferedInputStream(resolver.openInputStream(uri), BUFFER_SIZE), uri.toString());
+                    } else if (pathOfUri.toLowerCase().endsWith(".abz") || pathOfUri.toLowerCase().endsWith(".abz.zip")) {
+                        fh1 = getFormatHandler(FORMAT_ABZ);
+                        p = fh1.parseZipStream(new BufferedInputStream(resolver.openInputStream(uri), BUFFER_SIZE), uri.toString());
+                    }
+                    if (p != null && p.isValid()) {
+                        publications.add(p);
+                    }
+                } catch (FileNotFoundException e) {
+                    Log.i("Librarian", "Can't read: " + pathOfUri);
+                    // e.printStackTrace();
+                } catch (Exception e) {
+                    Log.i("Librarian", "Can't parse: " + pathOfUri);
+                    e.printStackTrace();
+                }
+            }
+        }catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void discoverPublications_bak(String storagePath, FormatHandler fh, List<Publication> publications) {
         FileFilter directoryFilter = new FileFilter() {
 			public boolean accept(File file) {
 				return file.isDirectory();

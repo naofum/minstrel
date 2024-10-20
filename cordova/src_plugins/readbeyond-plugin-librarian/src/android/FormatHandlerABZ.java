@@ -16,7 +16,13 @@
 
 package it.readbeyond.minstrel.librarian;
 
+import android.net.Uri;
+import android.os.Build;
+
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -27,7 +33,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.zip.ZipInputStream;
 
+import org.apache.cordova.CordovaInterface;
 import org.json.JSONObject;
 
 public class FormatHandlerABZ extends FormatHandlerAbstractZIP {
@@ -54,6 +62,77 @@ public class FormatHandlerABZ extends FormatHandlerAbstractZIP {
     public FormatHandlerABZ() {
         super();
         this.setFormatName(ABZ_FORMAT);
+    }
+
+    public Publication parseZipStream(InputStream input, String file) {
+        Publication p = super.parseFile(new File(file));
+
+        Format format = new Format(ABZ_FORMAT);
+
+        ZipInputStream zipFile;
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                zipFile = new ZipInputStream(input, Charset.forName("MS932"));
+            } else {
+                zipFile = new ZipInputStream(input);
+            }
+            boolean foundMetadataFile   = false;
+            boolean foundCover          = false;
+            boolean foundPlaylist       = false;
+            String zeCover              = null;
+            String zePlaylist           = null;
+            List<String> assets         = new ArrayList<String>();
+            ZipEntry zipEntry = zipFile.getNextEntry();
+            while (zipEntry != null) {
+                String name = zipEntry.getName();
+                String lower = name.toLowerCase();
+
+                if (lower.endsWith(ABZ_DEFAULT_COVER_JPG) || lower.endsWith(ABZ_DEFAULT_COVER_PNG)) {
+                    zeCover = name;
+                    // extract cover
+                    super.extractCover(zipFile, format, p.getID());
+                } else if (lower.endsWith(ABZ_EXTENSION_PLAYLIST)) {
+                    zePlaylist = name;
+                } else if (this.fileHasAllowedExtension(lower, ABZ_AUDIO_EXTENSIONS)) {
+                    p.isValid(true);
+                    assets.add(name);
+                } else if (lower.endsWith(ABZ_FILE_METADATA)) {
+                    p.isValid(true);
+                    foundMetadataFile = true;
+                    if (this.parseMetadataFile(zipFile, zipEntry, format)) {
+                        if (format.getMetadatum("internalPathPlaylist") != null) {
+                            foundPlaylist = true;
+                        }
+                        if (format.getMetadatum("internalPathCover") != null) {
+                            foundCover = true;
+                        }
+                    }
+                } // end if metadata
+                zipEntry = zipFile.getNextEntry();
+            } // end while
+            zipFile.close();
+
+            // set cover
+            if ((! foundCover) && (zeCover != null)) {
+                format.addMetadatum("internalPathCover", zeCover);
+            }
+
+            // default playlist found?
+            if ((!foundPlaylist) && (zePlaylist != null)) {
+                format.addMetadatum("internalPathPlaylist", zePlaylist);
+            }
+
+            // set number of assets
+            format.addMetadatum("numberOfAssets", "" + assets.size());
+
+        } catch (Exception e) {
+            // invalidate publication, so it will not be added to library
+            p.isValid(false);
+        } // end try
+
+        p.addFormat(format);
+
+        return p;
     }
 
     public Publication parseFile(File file) {
@@ -123,7 +202,7 @@ public class FormatHandlerABZ extends FormatHandlerAbstractZIP {
         return p;
     }
 
-    public String customAction(String path, JSONObject parameters) {
+    public String customAction(String path, JSONObject parameters, CordovaInterface cordova) {
         if (parameters != null) {
             String command = parameters.optString("command", null);
             if (command != null) {
@@ -133,9 +212,9 @@ public class FormatHandlerABZ extends FormatHandlerAbstractZIP {
                     String playlistEntry  = parameters.optString("internalPathPlaylist", null);
                     List<ZipAsset> assets = new ArrayList<ZipAsset>();
                     if ((playlistEntry == null) || (playlistEntry.equals(""))) {
-                        assets = this.getSortedListOfAssets(path, ABZ_AUDIO_EXTENSIONS);
+                        assets = this.getSortedListOfAssets(path, ABZ_AUDIO_EXTENSIONS, cordova);
                     } else {
-                        assets = this.parseM3UPlaylistEntry(path, playlistEntry);
+                        assets = this.parseM3UPlaylistEntry(path, playlistEntry, cordova);
                     }
                     return Librarian.stringify(assets, "assets");
                 }
@@ -189,5 +268,67 @@ public class FormatHandlerABZ extends FormatHandlerAbstractZIP {
             // nothing
         } 
         return assets;
-    } 
+    }
+
+    private List<ZipAsset> parseM3UPlaylistEntry(String path, String playlistEntry, CordovaInterface cordova) {
+        List<ZipAsset> assets = new ArrayList<ZipAsset>();
+        Uri uri = Uri.parse(path.replace("/content:/", "content://"));
+        String text = null;
+        try (InputStream input = cordova.getContext().getContentResolver().openInputStream(uri)) {
+            ZipInputStream zipFile;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                zipFile = new ZipInputStream(input, Charset.forName("MS932"));
+            } else {
+                zipFile = new ZipInputStream(input);
+            }
+            ZipEntry ze = zipFile.getNextEntry();
+            while (ze != null) {
+                while (ze != null) {
+                    if (ze.getName().contains(playlistEntry)) {
+                        text = this.getZipEntryText(zipFile, ze);
+                        break;
+                    }
+                    ze = zipFile.getNextEntry();
+                }
+                zipFile.close();
+            }
+        } catch (IOException ie) {
+            //
+        }
+        if (text == null) {
+            return assets;
+        }
+        String[] lines  = text.split("\n");
+
+        // check that the first line starts with the M3U header
+        if ((lines.length > 0) && (lines[0].startsWith(ABZ_M3U_HEADER))) {
+            for (int i = 1; i < lines.length; i++) {
+                String line = lines[i].trim();
+
+                // if line starts with the M3U preamble, parse it
+                if (line.startsWith(ABZ_M3U_LINE_PREAMBLE)) {
+                    HashMap<String, String> meta = new HashMap<String, String>();
+
+                    // get track duration and title
+                    Matcher m = ABZ_M3U_LINE_PATTERN.matcher(line);
+                    if (m.find()) {
+                        meta.put("duration",    m.group(1));
+                        meta.put("title",       m.group(2));
+                    }
+                    String line2 = lines[i+1].trim();
+
+                    // generate entry path
+                    File w = new File(new File(playlistEntry).getParent(), line2);
+                    line2 = w.getAbsolutePath().substring(1);
+
+                    // add asset
+                    assets.add(new ZipAsset(line2, meta));
+
+                    // go to the next pair of lines
+                    i += 1;
+                }
+            }
+        }
+        return assets;
+    }
 }

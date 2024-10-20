@@ -19,6 +19,8 @@ package it.readbeyond.minstrel.librarian;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.ThumbnailUtils;
+import android.net.Uri;
+import android.os.Build;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -26,6 +28,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -34,7 +39,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+import java.util.zip.ZipInputStream;
 
+import org.apache.cordova.CordovaInterface;
 import org.json.JSONObject;
 
 public abstract class FormatHandlerAbstractZIP implements FormatHandler {
@@ -99,7 +106,7 @@ public abstract class FormatHandlerAbstractZIP implements FormatHandler {
         return p;
     }
 
-    public String customAction(String path, JSONObject parameters) {
+    public String customAction(String path, JSONObject parameters, CordovaInterface cordova) {
         return "";
     }
 
@@ -111,6 +118,24 @@ public abstract class FormatHandlerAbstractZIP implements FormatHandler {
         String toReturn = "";
         try {
             BufferedInputStream is = new BufferedInputStream(zipFile.getInputStream(ze));
+            byte[] bytes = new byte[(int)(ze.getSize())];
+            is.read(bytes, 0, bytes.length);
+            is.close();
+            toReturn = new String(bytes);
+        } catch (Exception e) {
+            // nothing
+        }
+        return toReturn;
+    }
+
+    //
+    // TODO check encoding
+    //
+    // get the content of a given ZipEntry as a string
+    protected String getZipEntryText(InputStream zipFile, ZipEntry ze) {
+        String toReturn = "";
+        try {
+            BufferedInputStream is = new BufferedInputStream(zipFile);
             byte[] bytes = new byte[(int)(ze.getSize())];
             is.read(bytes, 0, bytes.length);
             is.close();
@@ -152,6 +177,32 @@ public abstract class FormatHandlerAbstractZIP implements FormatHandler {
             Collections.sort(assets);
         } catch (Exception e) {
             // nop 
+        }
+        return assets;
+    }
+
+    protected List<ZipAsset> getSortedListOfAssets(String path, String[] allowedExtensions, CordovaInterface cordova) {
+        List<ZipAsset> assets = new ArrayList<ZipAsset>();
+        Uri uri = Uri.parse(path.replace("/content:/", "content://"));
+        try (InputStream input = cordova.getContext().getContentResolver().openInputStream(uri)) {
+            ZipInputStream zipFile;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                zipFile = new ZipInputStream(input, Charset.forName("MS932"));
+            } else {
+                zipFile = new ZipInputStream(input);
+            }
+            ZipEntry ze = zipFile.getNextEntry();
+            while (ze != null) {
+                String   name  = ze.getName();
+                String   lower = name.toLowerCase();
+                if (this.fileHasAllowedExtension(lower, allowedExtensions)) {
+                    assets.add(new ZipAsset(name, null));
+                }
+                ze = zipFile.getNextEntry();
+            }
+            zipFile.close();
+        } catch (IOException ie) {
+            //
         }
         return assets;
     }
@@ -219,6 +270,64 @@ public abstract class FormatHandlerAbstractZIP implements FormatHandler {
         }
     }
 
+    // create a thumbnail image from the given cover image
+    // and returns its absolute path
+    protected void extractCover(InputStream f, Format format, String publicationID) {
+        String destinationName = publicationID + "." + format.getName() + ".png";
+        String entryName       = format.getMetadatum("internalPathCover");
+
+        if ((entryName == null) || (entryName.equals(""))) {
+            format.addMetadatum("relativePathThumbnail", "");
+            return;
+        }
+
+        try {
+            File destFile               = new File(this.thumbnailDirectoryPath, "orig-" + destinationName);
+            String destinationPath      = destFile.getAbsolutePath();
+
+            BufferedInputStream is      = new BufferedInputStream(f);
+            int numberOfBytesRead;
+            byte data[] = new byte[BUFFER_SIZE];
+
+            FileOutputStream fos        = new FileOutputStream(destFile);
+            BufferedOutputStream dest   = new BufferedOutputStream(fos, BUFFER_SIZE);
+
+            while ((numberOfBytesRead = is.read(data, 0, BUFFER_SIZE)) > -1) {
+                dest.write(data, 0, numberOfBytesRead);
+            }
+            dest.flush();
+            dest.close();
+//            is.close();
+            fos.close();
+
+            // create thumbnail
+            FileInputStream fis         = new FileInputStream(destinationPath);
+            Bitmap imageBitmap          = BitmapFactory.decodeStream(fis);
+            imageBitmap                 = Bitmap.createScaledBitmap(imageBitmap, this.thumbnailWidth, this.thumbnailHeight, false);
+            ByteArrayOutputStream baos  = new ByteArrayOutputStream();
+            imageBitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
+            byte[] imageData            = baos.toByteArray();
+
+            // write thumbnail to file
+            File destFile2              = new File(this.thumbnailDirectoryPath, destinationName);
+            String destinationPath2     = destFile2.getAbsolutePath();
+            FileOutputStream fos2       = new FileOutputStream(destFile2);
+            fos2.write(imageData, 0, imageData.length);
+            fos2.flush();
+            fos2.close();
+            baos.close();
+
+            // delete original cover
+            destFile.delete();
+
+            // set relativePathThumbnail
+            format.addMetadatum("relativePathThumbnail", destinationName);
+
+        } catch (Exception e) {
+            // nop
+        }
+    }
+
     // parse metadata file in
     // key1: value1
     // key2: value2
@@ -282,5 +391,69 @@ public abstract class FormatHandlerAbstractZIP implements FormatHandler {
             // nop 
             return false;
         } 
+    }
+
+    // parse metadata file in
+    // key1: value1
+    // key2: value2
+    // ...
+    // format
+    protected boolean parseMetadataFile(InputStream zipFile, ZipEntry ze, Format format) {
+        try {
+            String   name     = ze.getName();
+            String   metadata = getZipEntryText(zipFile, ze);
+            Matcher  matcher;
+
+            matcher = PATTERN_TITLE.matcher(metadata);
+            if (matcher.find()) {
+                format.addMetadatum("title", matcher.group(1).trim());
+            }
+
+            matcher = PATTERN_LANGUAGE.matcher(metadata);
+            if (matcher.find()) {
+                format.addMetadatum("language", matcher.group(1).trim());
+            }
+
+            matcher = PATTERN_AUTHOR.matcher(metadata);
+            if (matcher.find()) {
+                format.addMetadatum("author", matcher.group(1).trim());
+            }
+
+            matcher = PATTERN_NARRATOR.matcher(metadata);
+            if (matcher.find()) {
+                format.addMetadatum("narrator", matcher.group(1).trim());
+            }
+
+            matcher = PATTERN_DURATION.matcher(metadata);
+            if (matcher.find()) {
+                format.addMetadatum("duration", matcher.group(1).trim());
+            }
+
+            matcher = PATTERN_SERIES.matcher(metadata);
+            if (matcher.find()) {
+                format.addMetadatum("series", matcher.group(1).trim());
+            }
+
+            matcher = PATTERN_SERIES_INDEX.matcher(metadata);
+            if (matcher.find()) {
+                format.addMetadatum("seriesIndex", matcher.group(1).trim());
+            }
+
+            matcher = PATTERN_PLAYLIST.matcher(metadata);
+            if (matcher.find()) {
+                format.addMetadatum("internalPathPlaylist", matcher.group(1).trim());
+            }
+
+            matcher = PATTERN_COVER.matcher(metadata);
+            if (matcher.find()) {
+                format.addMetadatum("internalPathCover", matcher.group(1).trim());
+            }
+
+            return true;
+        } catch (Exception e) {
+            // nop
+            return false;
+        }
+
     }
 }

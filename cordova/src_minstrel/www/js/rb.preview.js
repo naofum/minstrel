@@ -352,6 +352,9 @@ RB.Preview.deleteFromLibrary = function() {
 
 // delete from library and delete file
 RB.Preview.deleteFile = function() {
+    var result = confirm('OK?');
+    if (!result) return;
+
     // delete item data 
     RB.Preview.deleteItemData(); 
 

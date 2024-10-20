@@ -73,6 +73,8 @@ RB.CBZReader.preventSwipe                              = false;
 RB.CBZReader.sliderIsChanging                          = false;
 RB.CBZReader.appStatusBeforeBackgrounded               = null;
 
+RB.CBZReader.panzoom                                   = null;
+
 // UI
 RB.CBZReader.UI                                        = {};
 RB.CBZReader.UI.divReader                              = 'divReader';
@@ -103,7 +105,7 @@ RB.CBZReader.initializeUI = function() {
 RB.CBZReader.initializePage = function() {
     // set app variables 
     RB.CBZReader.loadVariables();
-    
+
     // create manager objects
     RB.CBZReader.createManagers();
     
@@ -293,9 +295,10 @@ RB.CBZReader.onPanzoomZoom = function(e, panzoom, scale, opts) {
             
             // disable zoom AFTER actual scaling has been done
             // and then set the timeout to remove the prevent flag
-            RB.UI.getElement(RB.CBZReader.UI.divPanzoomInner).panzoom('option', { disableZoom: true });
+//            RB.UI.getElement(RB.CBZReader.UI.divPanzoomInner).panzoom('option', { disableZoom: true });
+            panzoom.setOptions({ disableZoom: true });
             window.setTimeout(function(){
-                RB.UI.getElement(RB.CBZReader.UI.divPanzoomInner).panzoom('option', { disableZoom: false });
+                panzoom.setOptions({ disableZoom: false });
                 RB.CBZReader.preventSnap = false;
                 window.clearTimeout(this);
             }, 1000);
@@ -306,8 +309,9 @@ RB.CBZReader.onPanzoomZoom = function(e, panzoom, scale, opts) {
     }
     // update scale factor
     RB.CBZReader.scaleFactor = scale;
-    RB.UI.getElement(RB.CBZReader.UI.divPanzoomInner).panzoom('option', { disablePan: (scale <= RB.CBZReader.maxFactor) });
-    
+//    RB.UI.getElement(RB.CBZReader.UI.divPanzoomInner).panzoom('option', { disablePan: (scale <= RB.CBZReader.maxFactor) });
+    RB.CBZReader.panzoom.setOptions({ disablePan: (scale <= RB.CBZReader.maxFactor) });
+
     // keep the image centered
     if (scale < RB.CBZReader.maxFactor) {
         RB.CBZReader.centerImage(true, true);
@@ -578,7 +582,8 @@ RB.CBZReader.setImageSrc = function(index) {
         RB.UI.hide(RB.CBZReader.currentImageElementID);
         
         // set image src
-        RB.CBZReader.currentImageElement.src = RB.App.joinPaths([RB.App.getTmpDirectory(true), RB.CBZReader.itemID, path]);
+//        RB.CBZReader.currentImageElement.src = RB.App.joinPaths([RB.App.getTmpDirectory(true), RB.CBZReader.itemID, path]);
+        RB.CBZReader.currentImageElement.src = RB.App.joinPaths(['https://localhost/__cdvfile_cache__/minstrel/tmp', RB.CBZReader.itemID, path]);
     }
 };
 
@@ -620,20 +625,29 @@ RB.CBZReader.onImageLoad = function() {
     RB.CBZReader.preventSnap = false;
     
     id = RB.CBZReader.UI.divPanzoomInner;
-    var el = RB.UI.getElement(id);
+//    var el = RB.UI.getElement(id);
+    var el = document.getElementById(id);
+//    RB.CBZReader.panzoom = Panzoom(el, { noBind: true });
+    RB.CBZReader.panzoom = Panzoom(el, { origin: '0% 0%' });
     try {
-        el.panzoom('destroy');
+//        el.panzoom('destroy');
+        RB.CBZReader.panzoom.destroy();
     } catch (e) {
         // nop
     }
     RB.UI.applyCSS(id, 'left', 0);
     RB.UI.applyCSS(id, 'top',  0);
-    el.panzoom({ minScale: 0.1, maxScale: 10 });
-    el.panzoom('option', { disablePan: (RB.CBZReader.scaleFactor <= RB.CBZReader.maxFactor) });
-    el.on('panzoomend',  RB.CBZReader.onPanzoomEnd);
-    el.on('panzoomzoom', RB.CBZReader.onPanzoomZoom);
-    el.on('panzoompan',  RB.CBZReader.onPanzoomPan);
-    
+//    el.panzoom({ minScale: 0.1, maxScale: 10 });
+//    el.panzoom('option', { disablePan: (RB.CBZReader.scaleFactor <= RB.CBZReader.maxFactor) });
+//    el.on('panzoomend',  RB.CBZReader.onPanzoomEnd);
+//    el.on('panzoomzoom', RB.CBZReader.onPanzoomZoom);
+//    el.on('panzoompan',  RB.CBZReader.onPanzoomPan);
+    RB.CBZReader.panzoom.setOptions({ minScale: 0.1, maxScale: 10 });
+    RB.CBZReader.panzoom.setOptions({ disablePan: (RB.CBZReader.scaleFactor <= RB.CBZReader.maxFactor) });
+    el.addEventListener('panzoomend',  RB.CBZReader.onPanzoomEnd);
+    el.addEventListener('panzoomzoom', RB.CBZReader.onPanzoomZoom);
+    el.addEventListener('panzoompan',  RB.CBZReader.onPanzoomPan);
+
     // scale
     RB.CBZReader.scaleImage();
 };
@@ -664,8 +678,10 @@ RB.CBZReader.scaleImage = function() {
     }
     
     var id = RB.CBZReader.UI.divPanzoomInner;
-    RB.UI.getElement(id).panzoom('zoom', RB.CBZReader.scaleFactor, { silent: true });
-    
+//    RB.UI.getElement(id).panzoom('zoom', RB.CBZReader.scaleFactor, { silent: true });
+//    RB.CBZReader.panzoom.zoom(RB.CBZReader.scaleFactor, { silent: true, focal: { x: 0, y: 0} });
+    RB.CBZReader.panzoom.zoom(RB.CBZReader.scaleFactor, { silent: true });
+
     if ((RB.CBZReader.zoomMode === 'fitother') && (RB.CBZReader.comicsMode)) {
         RB.CBZReader.centerTopImage();
     } else {
@@ -680,11 +696,14 @@ RB.CBZReader.scaleImage = function() {
 // center image on the specified axis
 RB.CBZReader.centerImage = function(center_x, center_y) {
     var id = RB.CBZReader.UI.divPanzoomInner;
-    var el = RB.UI.getElement(id);
-    var current_transform       = el.panzoom('getMatrix');
-    var transform_x             = current_transform[4];
-    var transform_y             = current_transform[5];
-    
+    var el = document.getElementById(id);
+//    var current_transform       = el.panzoom('getMatrix');
+//    var transform_x             = current_transform[4];
+//    var transform_y             = current_transform[5];
+    var current_transform       = RB.CBZReader.panzoom.getPan();
+    var transform_x             = current_transform.x;
+    var transform_y             = current_transform.y;
+
     // center horizontally
     if (center_x) {
         var available_width     = RB.UI.getScreenWidth() * (1 - (RB.CBZReader.borderLeft + RB.CBZReader.borderRight));
@@ -700,19 +719,25 @@ RB.CBZReader.centerImage = function(center_x, center_y) {
     }
 
     // perform translation
-    el.panzoom('option', { disablePan: false });
-    el.panzoom('pan', transform_x, transform_y, { silent: true });
-    el.panzoom('option', { disablePan: (RB.CBZReader.scaleFactor <= RB.CBZReader.maxFactor) });
+//    el.panzoom('option', { disablePan: false });
+//    el.panzoom('pan', transform_x, transform_y, { silent: true });
+//    el.panzoom('option', { disablePan: (RB.CBZReader.scaleFactor <= RB.CBZReader.maxFactor) });
+//    RB.CBZReader.panzoom.setOptions({ disablePan: true, disableZoom: true });
+//    RB.CBZReader.panzoom.pan(transform_x, transform_y, { silent: true });
+//    RB.CBZReader.panzoom.setOptions({ disablePan: (RB.CBZReader.scaleFactor <= RB.CBZReader.maxFactor) });
 };
 
 // in comics mode and fitother zoom mode,
 // center image along the fitted dimension, and scroll to top (or left) on the other
 RB.CBZReader.centerTopImage = function() {
     var id = RB.CBZReader.UI.divPanzoomInner;
-    var el = RB.UI.getElement(id);
-    var current_transform = el.panzoom('getMatrix');
-    var transform_x       = current_transform[4];
-    var transform_y       = current_transform[5];
+    var el = document.getElementById(id);
+//    var current_transform = el.panzoom('getMatrix');
+//    var transform_x       = current_transform[4];
+//    var transform_y       = current_transform[5];
+    var current_transform = RB.CBZReader.panzoom.getPan();
+    var transform_x       = current_transform.x;
+    var transform_y       = current_transform.y;
     var available_width   = RB.UI.getScreenWidth() * (1 - (RB.CBZReader.borderLeft + RB.CBZReader.borderRight));
     var available_height  = RB.UI.getScreenHeight() * (1 - (RB.CBZReader.borderTop + RB.CBZReader.borderBottom));
     var image_width       = RB.CBZReader.currentImageElement.width;
@@ -731,9 +756,12 @@ RB.CBZReader.centerTopImage = function() {
     }
 
     // perform translation
-    el.panzoom('option', { disablePan: false });
-    el.panzoom('pan',    transform_x, transform_y, { silent: true });
-    el.panzoom('option', { disablePan: (RB.CBZReader.scaleFactor <= RB.CBZReader.maxFactor) });
+//    el.panzoom('option', { disablePan: false });
+//    el.panzoom('pan',    transform_x, transform_y, { silent: true });
+//    el.panzoom('option', { disablePan: (RB.CBZReader.scaleFactor <= RB.CBZReader.maxFactor) });
+//    RB.CBZReader.panzoom.setOptions({ disablePan: false, disableZoom: true });
+//    RB.CBZReader.panzoom.pan(transform_x, transform_y, { silent: true });
+//    RB.CBZReader.panzoom.setOptions({ disablePan: (RB.CBZReader.scaleFactor <= RB.CBZReader.maxFactor) });
 };
 
 // set zoom mode to fit image into the screen

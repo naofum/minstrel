@@ -47,16 +47,22 @@ RB.Utilities = RB.Utilities || {};
     @return {object} x- The corresponding XML object, or throw exception if not able to.
 */
 RB.Utilities.loadXMLFile = function(file_name) {
+    var fname = file_name;
+    var i = fname.indexOf('cache');
+    if (i > 0) {
+        var x = file_name.substring(i + 5);
+        fname = 'https://localhost/__cdvfile_cache__' + x;
+    }
     try {
         if (window.XMLHttpRequest !== null) {
             var xhttp = new XMLHttpRequest();
-            xhttp.open('GET', file_name, false);
+            xhttp.open('GET', fname, false);
             xhttp.overrideMimeType('text/xml');
             xhttp.send(null);
             return xhttp.responseXML;
         }
     } catch (e) {
-        throw new RB.Exception('Utilities.loadXMLFile', 'Cannot open ' + file_name);
+        throw new RB.Exception('Utilities.loadXMLFile', 'Cannot open ' + fname);
     }
 };
 /**

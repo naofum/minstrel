@@ -331,14 +331,19 @@ RB.UI.openImageFullScreen = function(id, src, mode) {
             RB.UI.openImageFullScreen(id, src, 'detach');
         };
         
-        var el = RB.UI.getElement(popup_id + 'Container');
+//        var el = RB.UI.getElement(popup_id + 'Container');
+        var el = document.getElementById(popup_id + 'Container');
+        var panzoom = Panzoom(el);
         try {
-            el.panzoom('destroy');
+//            el.panzoom('destroy');
+            panzoom.destroy();
         } catch (e) {
             // nop
         }
-        el.panzoom({ minScale: 0.1, maxScale: 10 });
-        el.panzoom('option', { disablePan: false });
+//        el.panzoom({ minScale: 0.1, maxScale: 10 });
+//        el.panzoom('option', { disablePan: false });
+        panzoom.setOption({ minScale: 0.1, maxScale: 10 });
+        panzoom.setOption({ disablePan: false });
         /*
         el.on('panzoomend', function(e, panzoom, matrix, changed) {
             if (!changed) {
@@ -1009,7 +1014,12 @@ RB.UI.scrollTo = function(parent, target, offset, duration) {
     if (target.slice(-2) !== 'px') {
         target = '#' + target;
     }
-    parent.scrollTo(target, {offset: offset, duration: duration, axis: 'y'});
+//    parent.scrollTo(target, {offset: offset, duration: duration, axis: 'y'});
+    if (parent.css('writing-mode').startsWith('vertical')) {
+        parent.scrollTo(target, {offset: offset, duration: duration});
+    } else {
+        parent.scrollTo(target, {offset: offset, duration: duration, axis: 'y'});
+    }
 };
 
 // apply CSS rule

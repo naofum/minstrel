@@ -1,9 +1,9 @@
 <?xml version='1.0' encoding='utf-8'?>
 <widget
     id="com.github.naofum.minstrel"
-    version="3.0.1.a"
-    android-versionCode="300020"
-    ios-CFBundleVersion="3.0.1"
+    version="3.0.3"
+    android-versionCode="300030"
+    ios-CFBundleVersion="3.0.3"
     xmlns="http://www.w3.org/ns/widgets"
     xmlns:cdv="http://cordova.apache.org/ns/1.0">
     <name>Minstrel</name>
@@ -13,18 +13,19 @@
         Proudly brought to you by ReadBeyond. For free, because we love sharing great stories.
     </description>
     <author
-        email="minstrel@readbeyond.it"
-        href="http://www.readbeyond.it">
-        ReadBeyond, Padova, Italy
+        email="naofum@gmail.com"
+        href="https://ja.osdn.net/projects/fosj/wiki/Minstrel">
+        naofum, Japan
     </author>
     <content src="index.html" />
 
     <plugin name="cordova-plugin-whitelist" version="1" />
 
-    <access origin="http://readbeyond.it" />
-    <access origin="http://*.readbeyond.it" />
-    <access origin="https://readbeyond.it" />
-    <access origin="https://*.readbeyond.it" />
+    <!-- access origin="http://readbeyond.it" / -->
+    <!-- access origin="http://*.readbeyond.it" / -->
+    <!-- access origin="https://readbeyond.it" / -->
+    <!-- access origin="https://*.readbeyond.it" / -->
+    <!-- access origin="cdvfile://*" / -->
 
     <allow-intent href="http://*/*" />
     <allow-intent href="https://*/*" />
@@ -45,25 +46,10 @@
         <!-- xhdpi 96x96 -->
         <icon   src="res/icon/android/xhdpi.png"                density="xhdpi" />
 
-        <!-- land ldpi 426x320 -->
-        <splash src="res/splash/android/splash-land-ldpi.png"   density="land-ldpi" />
-        <!-- port ldpi 320x426 -->
-        <splash src="res/splash/android/splash-port-ldpi.png"   density="port-ldpi" />
+        <preference name="AndroidWindowSplashScreenAnimatedIcon" value="res/screen/android/splashscreen.xml" />
+        <resource-file src="static/android/strings.xml" target="app/src/main/res/values-ja/strings.xml" />
 
-        <!-- land mdpi 470x320 -->
-        <splash src="res/splash/android/splash-land-mdpi.png"   density="land-mdpi" />
-        <!-- port mdpi 320x470 -->
-        <splash src="res/splash/android/splash-port-mdpi.png"   density="port-mdpi" />
-
-        <!-- land hdpi 640x480 -->
-        <splash src="res/splash/android/splash-land-hdpi.png"   density="land-hdpi" />
-        <!-- port hdpi 480x640 -->
-        <splash src="res/splash/android/splash-port-hdpi.png"   density="port-hdpi" />
-        
-        <!-- land xhdpi 960x720 -->
-        <splash src="res/splash/android/splash-land-xhdpi.png"  density="land-xhdpi" />
-        <!-- port xhdpi 720x960 --> 
-        <splash src="res/splash/android/splash-port-xhdpi.png"  density="port-xhdpi" />
+        <!-- hook type="before_compile" src="hooks/before_compile/101_copy_values_ja.sh" / -->
     </platform>
 
 
@@ -150,8 +136,8 @@
     <preference name="LogLevel"                         value="INFO" />
     <preference name="AndroidLaunchMode"                value="singleTask" />
     <preference name="DefaultVolumeStream"              value="media" />
-    <preference name="android-minSdkVersion"            value="19" />
-    <preference name="android-targetSdkVersion"         value="28" />
+    <preference name="android-minSdkVersion"            value="24" />
+    <preference name="android-targetSdkVersion"         value="34" />
     <preference name="android-installLocation"          value="auto" /> 
 
     <!-- legacy / not documented / from PhoneGap -->
@@ -168,4 +154,8 @@
     <preference name="stay-in-webview"                  value="false" />
     <preference name="webviewbounce"                    value="false" />
     -->
+    <preference name="AndroidExtraFilesystems" value="cache" />
+    <edit-config file="AndroidManifest.xml" target="/manifest/application" mode="merge">
+        <application requestLegacyExternalStorage="true" />
+    </edit-config>
 </widget>
