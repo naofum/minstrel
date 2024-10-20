@@ -232,6 +232,10 @@ public class Unzipper extends CordovaPlugin {
                 // perform unzip
                 if (target) {
                     File destFile = new File(unzipDestinationDirectory, name);
+                    String canonicalPath = destFile.getCanonicalPath();
+                    if (!canonicalPath.startsWith(unzipDestinationDirectory.getCanonicalPath())) {
+                        throw new SecurityException();
+                    }
 
                     File destinationParent = destFile.getParentFile();
                     destinationParent.mkdirs();
@@ -343,7 +347,11 @@ public class Unzipper extends CordovaPlugin {
         for (String currentEntry : list) {
             ZipEntry entry = zipFile.getEntry(currentEntry);
             File destFile = new File(unzipDestinationDirectory, currentEntry);
-            
+            String canonicalPath = destFile.getCanonicalPath();
+            if (!canonicalPath.startsWith(unzipDestinationDirectory.getCanonicalPath())) {
+                throw new SecurityException();
+            }
+
             File destinationParent = destFile.getParentFile();
             destinationParent.mkdirs();
 
