@@ -1,9 +1,9 @@
 <?xml version='1.0' encoding='utf-8'?>
 <widget
     id="com.github.naofum.minstrel"
-    version="3.0.3"
-    android-versionCode="300030"
-    ios-CFBundleVersion="3.0.3"
+    version="3.0.5"
+    android-versionCode="300050"
+    ios-CFBundleVersion="3.0.5"
     xmlns="http://www.w3.org/ns/widgets"
     xmlns:cdv="http://cordova.apache.org/ns/1.0">
     <name>Minstrel</name>
@@ -27,10 +27,10 @@
     <!-- access origin="https://*.readbeyond.it" / -->
     <!-- access origin="cdvfile://*" / -->
 
-    <allow-intent href="http://*/*" />
-    <allow-intent href="https://*/*" />
-    <allow-intent href="mailto:*" />
-    <allow-intent href="geo:*" />
+    <!-- allow-intent href="http://*/*" / -->
+    <!-- allow-intent href="https://*/*" / -->
+    <!-- allow-intent href="mailto:*" / -->
+    <!-- allow-intent href="geo:*" / -->
 
 
     <!-- Android platform -->
