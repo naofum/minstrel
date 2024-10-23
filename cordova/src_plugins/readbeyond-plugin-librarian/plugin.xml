@@ -49,27 +49,8 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <category android:name="android.intent.category.DEFAULT" />
-                <data android:host="*" android:pathPattern=".*\\.epub" android:scheme="http" />
-                <data android:host="*" android:pathPattern=".*\\.epub" android:scheme="file" />
-                <data android:host="*" android:pathPattern=".*\\.epub" android:scheme="content" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <category android:name="android.intent.category.DEFAULT" />
                 <data android:mimeType="application/x-abz" />
                 <data android:scheme="http" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <data android:host="*" android:pathPattern=".*\\.abz" android:scheme="http" />
-                <data android:host="*" android:pathPattern=".*\\.abz" android:scheme="file" />
-                <data android:host="*" android:pathPattern=".*\\.abz" android:scheme="content" />
-                <data android:host="*" android:pathPattern=".*\\.abz\\.zip" android:scheme="http" />
-                <data android:host="*" android:pathPattern=".*\\.abz\\.zip" android:scheme="file" />
-                <data android:host="*" android:pathPattern=".*\\.abz\\.zip" android:scheme="content" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
@@ -82,27 +63,8 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <category android:name="android.intent.category.DEFAULT" />
-                <data android:host="*" android:pathPattern=".*\\.cbz" android:scheme="http" />
-                <data android:host="*" android:pathPattern=".*\\.cbz" android:scheme="file" />
-                <data android:host="*" android:pathPattern=".*\\.cbz" android:scheme="content" />
-                <data android:host="*" android:pathPattern=".*\\.cbz\\.zip" android:scheme="http" />
-                <data android:host="*" android:pathPattern=".*\\.cbz\\.zip" android:scheme="file" />
-                <data android:host="*" android:pathPattern=".*\\.cbz\\.zip" android:scheme="content" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <category android:name="android.intent.category.DEFAULT" />
                 <data android:mimeType="application/zip" />
                 <data android:scheme="http" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <data android:host="*" android:pathPattern=".*\\.zip" android:scheme="http" />
-                <data android:host="*" android:pathPattern=".*\\.zip" android:scheme="file" />
-                <data android:host="*" android:pathPattern=".*\\.zip" android:scheme="content" />
             </intent-filter>
         </config-file>
 

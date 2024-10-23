@@ -2,7 +2,7 @@
 <widget
     id="com.github.naofum.minstrel"
     version="3.0.5"
-    android-versionCode="300050"
+    android-versionCode="300051"
     ios-CFBundleVersion="3.0.5"
     xmlns="http://www.w3.org/ns/widgets"
     xmlns:cdv="http://cordova.apache.org/ns/1.0">
@@ -156,6 +156,6 @@
     -->
     <preference name="AndroidExtraFilesystems" value="cache" />
     <edit-config file="AndroidManifest.xml" target="/manifest/application" mode="merge">
-        <application requestLegacyExternalStorage="true" />
+        <application android:requestLegacyExternalStorage="true" />
     </edit-config>
 </widget>

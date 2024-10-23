@@ -249,7 +249,7 @@ public class Librarian extends CordovaPlugin {
 //                " OR " + MediaStore.Files.FileColumns.MIME_TYPE + "='application/epub+zip'";
         String selection = MediaStore.Files.FileColumns.MIME_TYPE + "='application/zip'" +
                 " OR " + MediaStore.Files.FileColumns.MIME_TYPE + "='application/x-cbz'" +
-                " OR " + MediaStore.Files.FileColumns.MIME_TYPE + "='application/vnd.comicbook+zip'" +
+                " OR " + MediaStore.Files.FileColumns.MIME_TYPE + "='application/x-abz'" +
                 " OR " + MediaStore.Files.FileColumns.MIME_TYPE + "='application/epub+zip'";
         try {
             Cursor cursor = resolver.query(collection, null, selection, null, null);
