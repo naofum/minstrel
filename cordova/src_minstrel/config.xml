@@ -2,7 +2,7 @@
 <widget
     id="com.github.naofum.minstrel"
     version="3.0.5"
-    android-versionCode="300051"
+    android-versionCode="300052"
     ios-CFBundleVersion="3.0.5"
     xmlns="http://www.w3.org/ns/widgets"
     xmlns:cdv="http://cordova.apache.org/ns/1.0">
