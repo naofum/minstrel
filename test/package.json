@@ -1,0 +1,12 @@
+{
+  "name": "minstrel-regression",
+  "version": "1.0.0",
+  "private": true,
+  "description": "End-to-end regression tests for the Minstrel Windows web app.",
+  "scripts": {
+    "test": "node regression.js"
+  },
+  "dependencies": {
+    "puppeteer-core": "^24.0.0"
+  }
+}

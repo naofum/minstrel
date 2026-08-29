@@ -1,0 +1,484 @@
+/*
+ * modern.css
+ *
+ * Phase 3: modern flat UI replacing the jQuery Mobile / nativeDroid themes.
+ * Styles the `ui-*` classes produced by lib/jquery-mobile-shim.js, so the
+ * HTML and JS stay unchanged. Font Awesome glyphs (css/nd/font-awesome.min.css)
+ * provide the icons.
+ */
+
+/* ==================================================================
+ * Design tokens
+ * ================================================================== */
+:root {
+    --accent: #2f80ed;
+    --accent-strong: #1a6de0;
+    --accent-soft: rgba(47, 128, 237, .12);
+    --bg: #f2f3f5;
+    --surface: #ffffff;
+    --surface-2: #f7f8fa;
+    --border: #e2e5ea;
+    --text: #1f2329;
+    --text-muted: #6b7280;
+    --header-bg: #ffffff;
+    --header-border: #e2e5ea;
+    --danger: #e5484d;
+    --radius: 10px;
+    --radius-sm: 8px;
+    --shadow: 0 1px 3px rgba(0, 0, 0, .08), 0 1px 2px rgba(0, 0, 0, .04);
+    --shadow-lg: 0 8px 30px rgba(0, 0, 0, .18);
+    --ui-font: 'Roboto', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+html.night {
+    --bg: #101318;
+    --surface: #1a1d24;
+    --surface-2: #22262f;
+    --border: #2c313d;
+    --text: #e5e7eb;
+    --text-muted: #9aa3af;
+    --header-bg: #171a20;
+    --header-border: #2c313d;
+    --accent-soft: rgba(47, 128, 237, .18);
+    --shadow: 0 1px 3px rgba(0, 0, 0, .4), 0 1px 2px rgba(0, 0, 0, .3);
+    --shadow-lg: 0 8px 30px rgba(0, 0, 0, .55);
+}
+
+/* ==================================================================
+ * Base
+ * ================================================================== */
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+html.ui-mobile { height: 100%; }
+body {
+    font-family: var(--ui-font);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 16px;
+    line-height: 1.5;
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* ==================================================================
+ * Pages / dialogs
+ * ================================================================== */
+.ui-mobile [data-role="page"],
+.ui-mobile [data-role="dialog"],
+.ui-page {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    min-height: 100%;
+    display: none;
+    border: 0;
+    background: var(--bg);
+    color: var(--text);
+}
+.ui-mobile .ui-page-active { display: block; overflow-y: auto; }
+
+/* ==================================================================
+ * App bars (header / footer)
+ * ================================================================== */
+.ui-header,
+.ui-footer {
+    background: var(--header-bg);
+    color: var(--text);
+}
+.ui-header {
+    display: flex;
+    align-items: center;
+    min-height: 56px;
+    padding: 0 8px;
+    border-bottom: 1px solid var(--header-border);
+}
+.ui-footer {
+    border-top: 1px solid var(--header-border);
+    padding: 0;
+}
+.ui-header-fixed { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; }
+.ui-footer-fixed { position: fixed; bottom: 0; left: 0; right: 0; z-index: 1000; }
+.ui-header > .ui-btn, .ui-footer > .ui-btn {
+    display: inline-flex;
+    margin: 0;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+    min-width: 40px;
+    min-height: 40px;
+    padding: 0 6px;
+    color: var(--text);
+}
+.ui-header .ui-btn-left, .ui-header .ui-btn-right,
+.ui-footer .ui-btn-left, .ui-footer .ui-btn-right {
+    position: static;
+}
+.ui-header .ui-btn:active, .ui-footer .ui-btn:active { background: var(--surface-2); }
+
+.ui-title {
+    flex: 1;
+    margin: 0;
+    padding: 0 8px;
+    text-align: center;
+    font-size: 18px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--text);
+}
+
+/* ==================================================================
+ * Content
+ * ================================================================== */
+.ui-content { padding: 12px; }
+.ui-field-contain { padding: 6px 0; }
+.ui-field-contain label { font-weight: 500; margin-bottom: 4px; display: block; }
+.ui-content .paddedContent { padding: 4px; }
+
+/* ==================================================================
+ * Buttons
+ * ================================================================== */
+.ui-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 42px;
+    padding: 0 16px;
+    margin: 4px 0;
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    text-decoration: none;
+    cursor: pointer;
+    font-size: 15px;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    user-select: none;
+}
+.ui-btn:active { background: var(--surface-2); }
+.ui-btn[disabled] { opacity: .5; pointer-events: none; }
+
+.ui-btn-inner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+}
+.ui-btn-text { display: block; }
+.ui-btn-icon-top .ui-btn-inner { flex-direction: column; gap: 3px; padding: 8px 4px; }
+.ui-btn-icon-top .ui-btn-inner .ui-icon { margin-bottom: 1px; }
+
+/* ==================================================================
+ * Icons (Font Awesome glyphs rendered by the nativedroid overrides)
+ * ================================================================== */
+.ui-icon {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    font-family: FontAwesome;
+    font-size: 16px;
+    line-height: 18px;
+    text-align: center;
+    color: inherit;
+}
+.ui-icon:before { display: block; font-family: FontAwesome; width: 18px; height: 18px; line-height: 18px; }
+.ui-icon-on { color: var(--accent); }
+.ui-icon-off { color: var(--text-muted); }
+
+/* Glyph mappings for the data-icon / data-split-icon names used by the app
+   (Font Awesome 3 glyphs). Replaces the mappings that used to live in the
+   nativeDroid theme. */
+.ui-icon-alert:before            { content: "\f071"; }
+.ui-icon-back:before             { content: "\f060"; }
+.ui-icon-backward:before         { content: "\f04a"; }
+.ui-icon-check:before            { content: "\f046"; }
+.ui-icon-chevron-down:before     { content: "\f078"; }
+.ui-icon-chevron-left:before     { content: "\f053"; }
+.ui-icon-chevron-right:before    { content: "\f054"; }
+.ui-icon-chevron-up:before       { content: "\f077"; }
+.ui-icon-circle-arrow-left:before{ content: "\f0a8"; }
+.ui-icon-delete:before           { content: "\f00d"; }
+.ui-icon-exchange:before         { content: "\f0ec"; }
+.ui-icon-forward:before          { content: "\f04e"; }
+.ui-icon-gear:before             { content: "\f013"; }
+.ui-icon-hdd:before              { content: "\f0a0"; }
+.ui-icon-list-ol:before          { content: "\f0cb"; }
+.ui-icon-lock:before             { content: "\f023"; }
+.ui-icon-minus:before            { content: "\f068"; }
+.ui-icon-ok:before               { content: "\f00c"; }
+.ui-icon-pause:before            { content: "\f04c"; }
+.ui-icon-play:before             { content: "\f04b"; }
+.ui-icon-plus:before             { content: "\f067"; }
+.ui-icon-question:before         { content: "\f128"; }
+.ui-icon-refresh:before          { content: "\f021"; }
+.ui-icon-reorder:before          { content: "\f0c9"; }
+.ui-icon-save:before             { content: "\f0c7"; }
+.ui-icon-search:before           { content: "\f002"; }
+.ui-icon-signout:before          { content: "\f08b"; }
+.ui-icon-sort-by-alphabet:before { content: "\f15d"; }
+.ui-icon-star:before             { content: "\f005"; }
+.ui-icon-step-backward:before    { content: "\f048"; }
+.ui-icon-step-forward:before     { content: "\f051"; }
+.ui-icon-stop:before             { content: "\f04d"; }
+.ui-icon-user:before             { content: "\f007"; }
+.ui-icon-unlock:before           { content: "\f09c"; }
+
+/* ==================================================================
+ * Navbars (bottom navigation)
+ * ================================================================== */
+.ui-navbar { width: 100%; }
+.ui-navbar ul { display: flex; list-style: none; margin: 0; padding: 0; }
+.ui-navbar li { flex: 1; min-width: 0; }
+.ui-navbar li .ui-btn {
+    width: 100%;
+    min-height: 56px;
+    margin: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    flex-direction: column;
+    gap: 2px;
+    font-size: 11px;
+    color: var(--text-muted);
+}
+.ui-navbar li .ui-btn-icon-top .ui-btn-inner { flex-direction: column; padding: 6px 2px; }
+.ui-navbar li .ui-btn-icon-top .ui-icon { font-size: 20px; margin-bottom: 2px; color: var(--text-muted); }
+.ui-navbar li .ui-btn:active, .ui-navbar li .ui-btn-active {
+    background: var(--accent-soft);
+    color: var(--accent);
+}
+.ui-navbar li .ui-btn-active .ui-icon { color: var(--accent); }
+
+/* ==================================================================
+ * Listview
+ * ================================================================== */
+.ui-listview {
+    list-style: none;
+    margin: 0;
+    padding: 8px;
+}
+.ui-listview-inset { border-radius: var(--radius); }
+.ui-li {
+    position: relative;
+    background: var(--surface);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    margin-bottom: 8px;
+    overflow: hidden;
+}
+.ui-li > a {
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    color: var(--text);
+    text-decoration: none;
+}
+.ui-li > a:active { background: var(--surface-2); }
+.ui-li-has-thumb > a { padding: 10px; }
+.ui-li-thumb {
+    width: 60px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 6px;
+    margin-right: 12px;
+    flex-shrink: 0;
+}
+.ui-li h4, .ui-li p { margin: 0; }
+.ui-li h4 { font-size: 16px; font-weight: 600; }
+.ui-li p { font-size: 13px; color: var(--text-muted); }
+/* split button (second <a> in a li) is anchored to the right */
+.ui-li > a:first-child:not(:only-child) { padding-right: 52px; }
+.ui-li > a + a {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 48px;
+    justify-content: center;
+    border-left: 1px solid var(--border);
+    color: var(--text-muted);
+}
+
+/* ==================================================================
+ * Search box (listview filter)
+ * ================================================================== */
+.ui-listview-filter { padding: 8px 12px; }
+.ui-input-search { position: relative; }
+.ui-input-search:before {
+    content: "\f002";
+    font-family: FontAwesome;
+    position: absolute;
+    left: 13px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-size: 15px;
+    z-index: 1;
+}
+.ui-input-search input.ui-input-text {
+    width: 100%;
+    padding: 10px 14px 10px 36px;
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    background: var(--surface);
+    color: var(--text);
+    font-size: 15px;
+    outline: none;
+    -webkit-appearance: none;
+}
+.ui-input-search input.ui-input-text:focus { border-color: var(--accent); }
+
+/* ==================================================================
+ * Collapsible (accordion)
+ * ================================================================== */
+.ui-collapsible-set { margin: 8px 0; }
+.ui-collapsible {
+    background: var(--surface);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    margin: 10px 12px;
+    overflow: hidden;
+}
+.ui-collapsible-heading { margin: 0; }
+.ui-collapsible-heading > .ui-btn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    margin: 0;
+    border: 0;
+    border-radius: 0;
+    background: var(--surface-2);
+    box-shadow: none;
+    min-height: 46px;
+    padding: 0 14px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 15px;
+}
+.ui-collapsible-heading .ui-btn-inner { justify-content: space-between; }
+.ui-collapsible-heading .ui-icon { color: var(--text-muted); }
+.ui-collapsible-heading .ui-btn:active { background: var(--border); }
+.ui-collapsible-content { padding: 12px 14px; }
+.ui-collapsible-content-collapsed { display: none; }
+
+/* ==================================================================
+ * Checkboxes / radios
+ * ================================================================== */
+.ui-checkbox, .ui-radio { position: relative; margin: 6px 0; }
+.ui-checkbox label, .ui-radio label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    cursor: pointer;
+    min-height: 44px;
+    color: var(--text);
+}
+.ui-checkbox label:active, .ui-radio label:active { background: var(--surface-2); }
+.ui-checkbox label .ui-btn-text, .ui-radio label .ui-btn-text { flex: 1; }
+.ui-checkbox label .ui-btn-inner, .ui-radio label .ui-btn-inner {
+    justify-content: flex-start;
+    gap: 10px;
+    width: 100%;
+}
+.ui-checkbox-on, .ui-radio-on { border-color: var(--accent) !important; background: var(--accent-soft) !important; }
+.ui-checkbox-off .ui-icon, .ui-radio-off .ui-icon { color: var(--text-muted); }
+
+/* ==================================================================
+ * Controlgroup
+ * ================================================================== */
+.ui-controlgroup { display: flex; flex-direction: column; gap: 8px; margin: 8px 0; }
+.ui-controlgroup > .ui-btn { justify-content: flex-start; width: 100%; }
+.ui-controlgroup .ui-btn-icon-left .ui-btn-inner { justify-content: flex-start; }
+
+/* ==================================================================
+ * Sliders
+ * ================================================================== */
+.ui-slider { position: relative; height: 44px; margin: 8px 0; }
+.ui-slider-track {
+    position: absolute;
+    top: 50%;
+    left: 10px;
+    right: 10px;
+    transform: translateY(-50%);
+    height: 6px;
+    border-radius: 3px;
+    background: var(--border);
+}
+.ui-slider-handle {
+    position: absolute;
+    top: 50%;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--accent);
+    transform: translate(-50%, -50%);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, .3);
+}
+
+/* ==================================================================
+ * Popups / dialogs
+ * ================================================================== */
+.ui-popup {
+    background: var(--surface);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    padding: 16px;
+    max-height: 85%;
+    overflow-y: auto;
+    color: var(--text);
+    width: min(85%, 340px);
+}
+.ui-popup .ui-header { position: static !important; background: transparent; border-bottom: 1px solid var(--border); min-height: 0; padding: 0 0 10px; margin-bottom: 10px; }
+.ui-popup .ui-header .ui-title { text-align: left; padding: 0; font-size: 18px; }
+.ui-popup .ui-content { padding: 0; }
+
+/* ==================================================================
+ * Spinner
+ * ================================================================== */
+.ui-loader { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 99999; }
+
+/* ==================================================================
+ * Misc helpers
+ * ================================================================== */
+.ui-corner-all { border-radius: var(--radius); }
+.ui-shadow { box-shadow: var(--shadow); }
+.ui-screen-hidden { display: none !important; }
+
+/* ==================================================================
+ * Inline action rows (settings reset buttons etc., styled as buttons
+ * without a data-role)
+ * ================================================================== */
+.message {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    margin: 6px 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    box-shadow: var(--shadow);
+    cursor: pointer;
+}
+.message:active { background: var(--surface-2); }
+.message i {
+    font-family: FontAwesome;
+    font-size: 18px;
+    width: 18px;
+    text-align: center;
+    color: var(--text-muted);
+    font-style: normal;
+}
+.message p { margin: 0; }
+.message.warning { border-left: 4px solid #f5a623; }
+.message.error { border-left: 4px solid var(--danger); }

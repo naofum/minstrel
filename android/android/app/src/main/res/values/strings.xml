@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Minstrel</string>
+    <string name="title_activity_main">Minstrel</string>
+    <string name="package_name">com.github.naofum.minstrel</string>
+    <string name="custom_url_scheme">com.github.naofum.minstrel</string>
+</resources>
