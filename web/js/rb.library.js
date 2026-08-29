@@ -38,6 +38,8 @@ RB.Library.UI.txtNoItemsFound                = 'txtNoItemsFound';
 RB.Library.UI.btnChangeLanguage              = 'btnChangeLanguage';
 RB.Library.UI.btnScanDefaultDirectory        = 'btnScanDefaultDirectory';
 RB.Library.UI.btnChooseOtherDirectory        = 'btnChooseOtherDirectory';
+RB.Library.UI.btnImportBooks                 = 'btnImportBooks';
+RB.Library.UI.btnImportFolder                = 'btnImportFolder';
 RB.Library.UI.divFooter                      = 'divFooter';
 RB.Library.UI.divFooterNavbar                = 'divFooterNavbar';
 RB.Library.UI.btnRefresh                     = 'btnRefresh';
@@ -101,6 +103,9 @@ RB.Library.initializePage = function() {
     //
     RB.Library.getFilesystemInfo();
 
+    // listen for "Open with Minstrel" intents (SAF / file managers)
+    RB.Library.setupOpenWithListener();
+
 //    var admobid = {};
 //    admobid = {
 //        banner: 'ca-app-pub-9209419102968336/1565302004',
@@ -157,6 +162,8 @@ RB.Library.createManagers = function() {
                                                                           'doubletap': RB.Library.chooseOtherDirectory    }, false);
     RB.UI.bindSimpleButtonEvents(RB.Library.UI.btnScanDefaultDirectory, { 'click':     RB.Library.scanUserStorage         }, false);
     RB.UI.bindSimpleButtonEvents(RB.Library.UI.btnChooseOtherDirectory, { 'click':     RB.Library.chooseOtherDirectory    }, false);
+    RB.UI.bindSimpleButtonEvents(RB.Library.UI.btnImportBooks,          { 'click':     RB.Library.importBooks            }, false);
+    RB.UI.bindSimpleButtonEvents(RB.Library.UI.btnImportFolder,         { 'click':     RB.Library.importFolder           }, false);
     
     // reset flag
     RB.Library.createdManagers = true;
@@ -756,7 +763,8 @@ RB.Library.openItem = function(id, preview) {
 
 // button actions
 RB.Library.refreshLibraryFromUser = function() {
-    RB.Library.refreshLibraryList(true);
+    // show the import/scan dialog (Scan default directory, Import books, Import folder, ...)
+    RB.Library.showScanStorageDialog();
 };
 RB.Library.openSettings = function() {
     RB.App.openPage(RB.App.PagesEnum.SETTINGS);
@@ -785,6 +793,75 @@ RB.Library.onLanguageChanged = function() {
 RB.Library.chooseOtherDirectory = function() {
     if (RB.App.isAndroid()) {
         RB.App.openPage(RB.App.PagesEnum.FILECHOOSER);
+    }
+};
+
+// true when running inside the Capacitor WebView on a native platform
+RB.Library.isNative = function() {
+    return (typeof window !== 'undefined') && (window.Capacitor) && (typeof Capacitor.isNativePlatform === 'function') && (Capacitor.isNativePlatform());
+};
+
+// import one or more book files via the system picker (SAF ACTION_OPEN_DOCUMENT)
+RB.Library.importBooks = function() {
+    if (!RB.Library.isNative()) {
+        RB.UI.showNotification(RB.UI.i18n('txtImportFrom'));
+        return;
+    }
+    Capacitor.Plugins.Importer.importDocuments().then(function(result) {
+        var imported = (result && result.imported) ? result.imported : [];
+        RB.Library.onImportDone(imported);
+    }).catch(function(err) {
+        RB.App.message('Import failed: ' + err, RB.App.MessageSeverityEnum.ERROR);
+    });
+};
+
+// import a whole folder via the system picker (SAF ACTION_OPEN_DOCUMENT_TREE)
+RB.Library.importFolder = function() {
+    if (!RB.Library.isNative()) {
+        RB.UI.showNotification(RB.UI.i18n('txtImportFrom'));
+        return;
+    }
+    Capacitor.Plugins.Importer.importDirectory().then(function(result) {
+        var imported = (result && result.imported) ? result.imported : [];
+        RB.Library.onImportDone(imported);
+    }).catch(function(err) {
+        RB.App.message('Import failed: ' + err, RB.App.MessageSeverityEnum.ERROR);
+    });
+};
+
+// common handling after an import finished
+RB.Library.onImportDone = function(imported) {
+    if (imported.length > 0) {
+        RB.UI.closeDialog();
+        RB.UI.showNotification('Imported ' + imported.length + ' book(s)');
+        RB.Library.refreshLibraryList(true);
+    } else {
+        RB.UI.showNotification(RB.UI.i18n('txtNoItemsFound'));
+    }
+};
+
+// handle "Open with Minstrel" intents from file managers
+RB.Library.setupOpenWithListener = function() {
+    if (!RB.Library.isNative()) {
+        return;
+    }
+    // cold start: the intent arrived before this page was ready
+    Capacitor.Plugins.Importer.getPendingOpenRequest().then(function(result) {
+        if ((result) && (result.request) && (result.request.name)) {
+            RB.Library.onOpenWith(result.request);
+        }
+    }).catch(function() { /* nop */ });
+    // warm start: app already running (onNewIntent)
+    Capacitor.Plugins.Importer.addListener('openRequest', function(request) {
+        RB.Library.onOpenWith(request);
+    });
+};
+
+// refresh the library after an external "open with" import
+RB.Library.onOpenWith = function(request) {
+    if ((request) && (request.name)) {
+        RB.UI.showNotification('Imported: ' + request.name);
+        RB.Library.refreshLibraryList(true);
     }
 };
 
