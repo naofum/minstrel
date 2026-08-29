@@ -1,89 +1,137 @@
-# Minstrel J
+# Minstrel (modernized edition)
 
-**Minstrel J** is a FLOSS hybrid reading app specifically designed for Audio-eBooks
+**Minstrel** is a FLOSS hybrid reading app designed for Audio-eBooks.
 
-* Version: 3.0.3J (Japanese Edition)
-* Date: 2024-10-19
-* Developed by: [ReadBeyond][rb] (modified by naofum)
-* Lead Developer: [Alberto Pettarin][ap]
-* License: GPL Version 3
-* Web Page: [Minstrel][webpage]
-* Contact: [minstrel@readbeyond.it](mailto:minstrel@readbeyond.it)
+This repository is a **modernized continuation** of the original
+[Minstrel][webpage] by [ReadBeyond][rb] / [Alberto Pettarin][ap],
+with great thanks to the original authors for their wonderful work.
+It keeps the same reader engine and UI, but replaces the legacy
+Cordova build with a current architecture:
 
-## Installing the App
+* the **same `web/` codebase** is shared by all platforms,
+* a small **Java backend** (JDK `HttpServer`, no dependencies) serves
+  the app for Windows/PC development,
+* the **Android app** is rebuilt with **Capacitor** and native plugins
+  (audio playback now uses **androidx.media3 / ExoPlayer**).
 
-If you just want to install the app on your phone/tablet,
-you can download [**Menestrello**][menestrello],
-the official stable release of **Minstrel**
-maintained by ReadBeyond, using:
+* Version: 4.0.0
+* Author: naofum@gmail.com
+* Original author: [Alberto Pettarin][ap] / [ReadBeyond][rb]
+* License: MIT
+* Original Web Page: [Minstrel][webpage]
 
-1. [Google Play][googleplay] (Android devices)
+---
 
+## Repository layout
 
-## Developing the App
+```
+minstrel/
+  server/   Java 21 (Maven) backend for Windows/PC development (JDK HttpServer)
+  web/      Shared UI - single source of truth used by all platforms
+  android/  Capacitor 8 Android app (package com.github.naofum.minstrel)
+  test/     End-to-end regression tests (Puppeteer)
+  data/     Runtime data / sample books (minstrel/...)
+```
+
+The platform differences are confined to a thin transport layer:
+
+* in a browser the app talks to the local Java server over HTTP
+  (`/api/commander`, `/api/librarian`, `/api/unzipper`),
+* on Android it talks to the native Capacitor plugins
+  (`Commander`, `Librarian`, `Unzipper`, `Media`).
+
+---
+
+## Building and Running
 
 ### System Requirements
 
-1. [Android SDK][androidsdk] (Android)
-2. [Apache Cordova 13.0.0][cordova]
+* **Java 21** (JDK) and **Maven** (for the Windows server)
+* **Node.js / npm** (for Capacitor and the regression tests)
+* **Android SDK** (for the Android app)
+* JDK 17+ is required by the Android Gradle plugin
 
-If you want to build the Android APK from command line,
-make sure the Android SDK is in your `$PATH`
-so that `cordova` can run it.
+### Windows / PC (web app in a browser)
 
-### Installation
+1. Clone the repository:
 
-1. Clone the GitHub repository and enter the `cordova` directory:
-    
     ```bash
     $ git clone https://github.com/naofum/minstrel.git
-    $ cd minstrel/cordova
+    $ cd minstrel
     ```
 
-2. Create the Cordova project directory:
-   
+2. Put your EPUB / CBZ / ABZ files into `data/minstrel/`.
+
+3. Build the Java server and start the app:
+
     ```bash
-    $ bash create_minstrel.sh android
+    $ powershell -File run.ps1
     ```
 
-3. Build the Android version:
-    
+    (or `run.bat`). This runs `mvn package`, starts the server at
+    `http://127.0.0.1:8000/`, and opens the app in your browser.
+    Press **"Scan default directory"** on first run to import your books.
+
+### Android (Capacitor app)
+
+1. Install dependencies and sync the shared `web/` assets:
+
     ```bash
-    $ cd minstrel/
-    $ bash build.sh
+    $ cd android
+    $ npm install
+    $ npx cap sync android
     ```
 
-    will build the app and copy the generated APK into `/tmp/`.
+2. Build the debug APK from the command line:
 
+    ```bash
+    $ cd android/android
+    $ ./gradlew assembleDebug
+    # APK: android/android/app/build/outputs/apk/debug/app-debug.apk
+    ```
 
-## Documentation
+    or open the project in Android Studio and run it:
 
-Basically, all you have is
-[the official Web page][webpage]
-of the project and
-the comments in the source code.
+    ```bash
+    $ cd android
+    $ npx cap open android
+    ```
 
-Unfortunately, at the moment
-we do not have enough resources
-for properly documenting this project.
-You can help us by 
-[sponsoring this project](#supporting).
+3. To run on a connected device/emulator:
 
+    ```bash
+    $ npx cap run android
+    ```
+
+> The Android app loads the shared `web/` code from its assets
+> (`npx cap sync` copies it). Data is stored in the app's external
+> files directory (`.../com.github.naofum.minstrel/files/minstrel/`).
+
+### Regression tests (Windows web app)
+
+Start the Java server, then:
+
+```bash
+$ cd test
+$ npm install
+$ npm test
+```
+
+---
 
 ## Features
 
-* Supported formats: EPUB 2, EPUB 3 (reflowable and pre-paginated), CBZ, ABZ (more can be added easily)
+* Supported formats: EPUB 2, EPUB 3 (reflowable and pre-paginated), CBZ, ABZ
 * Multilingual UI: EN, IT, DA, FR, DE, PL, ES, TR, JA
-* Import documents from: browser, Download Manager, Notifications, or the file system (Android); Safari and iTunes (iOS)
+* Import documents from the file system / library scanning
 * Library sorted by: author, title, narrator, duration, language, series, or recently open
-* Library titles can be filtered
-* Display book metadata
+* Library titles can be filtered; book metadata is displayed
 * Reading settings saved per book, and globally customizable defaults
 * Night mode, customizable colors, orientation lock, screen brightness
 * Several reading fonts, including OpenDyslexic and TestMe fonts for dyslexic people
 * Customizable touch zones
 * Incremental unzipping of assets
-* Nearly complete support for EPUB 3 Media Overlays (aka SMIL or read aloud)
+* Nearly complete support for EPUB 3 Media Overlays (SMIL / read aloud)
 * Tap-text-to-play-it, synchronous highlighting, autoscroll
 * Keep playing audio while the app is in background
 * Adjustable playback speed with rate-vs-pitch correction (0.5x-2.0x)
@@ -95,115 +143,120 @@ You can help us by
 * Presentation mode and image info in CBZ, M3U support in ABZ
 * IPA Mincho font (Japanese Edition)
 
+### What changed in this edition
 
-## Limitations/Missing Features/TODO List
+* **Audio engine**: the Android app now plays audio with
+  **androidx.media3 (ExoPlayer)** instead of the legacy
+  `MediaPlayer` + Sonic `.so`. Playback speed (0.5x-2.0x) is built-in,
+  so no native Sonic library is needed.
+* **No Cordova**: the Android app is a **Capacitor** project with small
+  native plugins; the shared UI is served from the app assets.
+* **Windows/PC development**: a zero-dependency **Java HTTP server**
+  serves the same `web/` app in a browser, so the reader can be
+  developed and tested without an Android device.
+* **Modernized front-end**: the legacy jQuery Mobile / jQuery
+  dependencies were replaced by small self-contained shims
+  (`jquery-mobile-shim.js`, `mini-jquery.js`, `mini-spectrum.js`),
+  reducing dependency risk while keeping the same look and behavior.
 
-* Full text search, search in Google/Wikipedia/etc.
-* Dictionary/vocabulary building
-* Annotations/highlighting/bookmarks
-* Asset drawers/extraction, e.g. image collection
-* Sharing
-* Cloud/personal server integration
+---
+
+## Libraries and Tools
+
+### Front-end (`web/`)
+
+* [Hammer.js][hammer] - MIT (touch gestures)
+* [sprintf.js][sprintf] - unrestricted (string formatting)
+* [cssbeautify.js][cssbeautify] - MIT
+* `panzoom.min.js` - MIT (image zoom)
+* `mini-jquery.js` - jQuery-compatible shim (this project, MIT)
+* `jquery-mobile-shim.js` - jQuery Mobile shim (this project, MIT)
+* `mini-spectrum.js` - color-picker shim (this project, MIT)
+* [Font Awesome][fontawesome] - OFL
+* [nativeDroid][nativedroid] theme (UI styling)
+
+### Backend (`server/`)
+
+* JDK 21 [`HttpServer`][jdkserver] - built into the JDK, no runtime dependencies
+* [Maven][maven] + [JUnit 5][junit] (build and tests)
+
+### Android (`android/`)
+
+* [Capacitor 8][capacitor] - Apache 2.0
+* [androidx.media3 / ExoPlayer][media3] 1.11.0 - audio playback
+* [androidx.core:core-splashscreen][core_splashscreen]
+* AndroidX AppCompat / CoordinatorLayout
+
+### Tests (`test/`)
+
+* [Puppeteer][puppeteer] - end-to-end browser tests
+
+---
+
+## Documentation
+
+The main source of documentation is the
+[official Web page][webpage] of the project and the comments in the
+source code. Thanks to the modernized structure, the code is split
+into small, focused components (`server/`, `web/`, `android/`, `test/`)
+that are easier to navigate than the original monolithic Cordova tree.
+
+---
+
+## TODO / Future Work
+
+* Full text search, dictionary/vocabulary building, annotations
 * Downloading documents directly inside the app
 * User-provided fonts
-* UI for allowing the user to modify the book CSS on the fly (and save it)
 * OPDS support
-* EPUB parsing takes shortcuts here and there
-* EPUB rendering should happen in its own `<iframe>` (=> no monkey patching)
-* Better pagination, especially in Android
-* Progress indicators of some sort
-* Support for facing FXL pages
-* Support for parallel texts, e.g. via EPUB 3 Multiple Renditions
-* Split screens and other panels
-* Document metadata page should show TOC/assets preview
-* Reading metadata from ID3 tags of MP3 files
-* Streaming audio from a remote server
-* More robust unzipping, e.g. checking for the required space, etc.
-* JS code should be refactored, e.g. using a sane framework
-* User-provided localization, e.g. via PO files
-* User manual/tutorial
-* UI/UX could be drastically improved
-* Accessibility testing
-* Formal testing
+* Better pagination, support for facing FXL pages and parallel texts
+* MediaSessionService-based lock screen / media notification controls
+  (playback already continues in background)
+* Formalized tests for the Android app
+* The reader engine still carries legacy quirks (monkey-patching of
+  injected XHTML) that a future `<iframe>`-based renderer would remove
 
+---
 
 ## Supporting and Contributing
 
-### Supporting
+We are grateful to the original authors and welcome contributors.
 
-Would you like supporting the development of **Minstrel**?
+If you are able to contribute code directly, feel free to open a pull
+request. Please make your code consistent with the existing code base
+style and test your code before opening the pull request.
 
-We are open to accept sponsorships to
+Any contribution adding or altering the JS/native plugin interfaces
+should work for both the browser (HTTP) and Android (Capacitor)
+backends, since the `web/` layer is shared.
 
-* fix bugs,
-* add new features,
-* improve the quality and the performance of the code,
-* support other platforms (e.g., Web or Windows Phone),
-* acquire devices for testing purposes,
-* hire an accessibility expert to make the app accessible,
-* hire an UI designer to redesign the app, and
-* improve the documentation.
-
-Feel free to [get in touch](mailto:naofum@gmail.com).
-
-### Contributing
-
-If you are able to contribute code directly,
-that's great!
-Feel free to open a pull request,
-we will be glad to have a look at it.
-
-Please make your code consistent with
-the existing code base style
-and test your contributed code
-before opening the pull request.
-
-Create a new branch (e.g., `myfeature`)
-for each logically-independent feature
-you want to contribute.
-
-Any contribution adding or altering
-the JS/native plugin interfaces
-must work for both Android and iOS
-before the contribution can be merged
-into the master branch of the app.
-This policy ensures that both platforms
-are supported and have the same features
-at any given time.
-Improvements to the existing native plugins
-that do not alter the JS/native interfaces
-are not subject to this rule.
-
-**Please note that, by opening a pull request,
-you automatically agree to apply
-the MIT license
-to the code you contribute.**
-
-If you think you found a bug,
-please use the
+If you think you found a bug, please use the
 [GitHub issue tracker](https://github.com/naofum/minstrel/issues)
 to file a bug report.
 
+**Please note that, by opening a pull request, you automatically agree
+to apply the MIT license to the code you contribute.**
+
+---
 
 ## Legal Information
 
 ### License
 
-**Minstrel J** is released under the terms of the GPLv3.
+**Minstrel** is released under the terms of the MIT License.
 See the [LICENSE](LICENSE) file for details.
-
 
 ### Privacy Policy
 
 We value your privacy as much as we value ours.
-We does not collect any data about your eBooks,
-reading preferences, or reading statistics.
-On Android, the Network connection permission is requested solely
-because Minstrel uses a WebView ("in-app browser") to render the eBooks,
-however the app does not send data to nor receive data from the Internet,
-except for downloading a file when the user selects
-"Open with Minstrel" in the browser.
+We do not collect any data about your eBooks, reading preferences,
+or reading statistics.
 
+* On Android, the app renders eBooks in a WebView and plays audio with
+  the built-in media engine; it does not send data to or receive data
+  from the Internet.
+* On Windows/PC, the app is served by a local `http://127.0.0.1` server
+  for development; it does not contact the network.
 
 ### Font Licenses
 
@@ -291,78 +344,22 @@ Copyright © 2011, Cyreal (www.cyreal.org), with Reserved Font Name "Volkhov". T
 Web: [http://scripts.sil.org/OFL][sil_ofl_fonts]
 
 
-### Third-Party Licenses and Trademarks
-
-#### Apache Cordova
-
-This app has been compiled using `Apache Cordova 13.0.0` by the Apache Software Foundation, released under the terms of the Apache License, Version 2.0.
-
-Web: [http://cordova.apache.org/][cordova]
-
-#### cssbeautify.js
-
-This app includes `cssbeautify.js` code by Ariya Hidayat (Sencha Inc.), released under the terms of the MIT License.
-
-Web: [http://cssbeautify.com/][cssbeautify]
-
-#### EPUB
+### Trademarks
 
 `EPUB` is a registered trademark of the International Digital Publishing Forum (IDPF).
 
 Web: [http://idpf.org/][epub]
 
-#### Hammer.js
-
-This app includes `Hammer.js` code by Jorik Tangelder, released under the terms of the MIT License.
-
-Web: [https://github.com/EightMedia/hammer.js][hammer]
-
-#### jQuery
-
-This app includes `jQuery 3.7.1` code by the jQuery Foundation, released under the terms of the MIT License.
-
-Web: [https://jquery.org/][jquery]
-
-#### jQuery Mobile
-
-This app includes `jQuery Mobile` code by the jQuery Foundation, released under the terms of the MIT License.
-
-Web: [http://jquerymobile.com/][jquerymobile]
-
-#### nativeDroid
-
-The UI theme is `nativeDroid` by Raphael Wildhaber.
-
-Web: [http://nativedroid.godesign.ch/][nativedroid]
-          
-#### Objective-Zip
-
-On iOS, this app uses the `Objective-Zip` wrapper for Zlib and MiniZip, released under the terms of the New BSD License.
-
-Web: [https://github.com/flyingdolphinstudio/Objective-Zip][objective_zip]
-          
-#### Sonic Library 
-
-On Android, this app uses the `Sonic Library` by Bill Cox, released under the terms of the GNU Lesser General Public Licensee 2.1.
-
-Web: [http://dev.vinux-project.org/sonic/][sonic]
-
-#### sprintf.js 
-
-This app includes `sprintf.js` code by Ash Searle, released under the terms of the "This code is unrestricted: you are free to use it however you like." license.
-
-#### Admob Plugin Pro
-
-This app includes `Admob Plugin Pro` code by Raymond Xie, released under the terms of the MIT License.
-
-#### IPA Font
-
-This app includes `IPA Font` by IPA, released under the terms of the IPA Font License.
-
-
-
+---
 
 ## Acknowledgments
+
+We express our deep gratitude to the original author **Alberto Pettarin**
+and **ReadBeyond** for creating Minstrel and releasing it as FLOSS.
+This modernized edition is built directly on their work and would not
+exist without them.
+
+Additional thanks from the original project:
 
 * Antonio Tombolini and the technical staff of Simplicissimus Book Farm provided many useful comments.
 * Marta D'Asaro designed the icon.
@@ -375,22 +372,20 @@ This app includes `IPA Font` by IPA, released under the terms of the IPA Font Li
 [rb]: http://www.readbeyond.it/
 [ap]: http://www.albertopettarin.it/
 [webpage]: http://www.readbeyond.it/minstrel/
-[googleplay]: https://play.google.com/store/apps/details?id=com.github.naofum.menestrello
-[menestrello]: http://www.readbeyond.it/menestrello/
-[apk]: http://www.readbeyond.it/menestrello/
-[androidsdk]: https://developer.android.com/sdk/
-[xcode]: https://developer.apple.com/xcode/
-[cordova]: http://cordova.apache.org/
-[cssbeautify]: http://cssbeautify.com/
 [epub]: http://idpf.org/
 [hammer]: https://github.com/EightMedia/hammer.js
-[jquery]: https://jquery.org/
-[jquerymobile]: http://jquerymobile.com/
+[sprintf]: https://github.com/alexei/sprintf.js
+[cssbeautify]: http://cssbeautify.com/
+[fontawesome]: http://fontawesome.io/
 [nativedroid]: http://nativedroid.godesign.ch/
-[objective_zip]: https://github.com/flyingdolphinstudio/Objective-Zip
 [open_dyslexic_font]: http://opendyslexic.org/
 [roboto]: http://www.google.com/fonts/specimen/Roboto
 [sil_ofl_fonts]: http://scripts.sil.org/OFL
 [ipa_fonts]: https://moji.or.jp/ipafont/license/
-[sonic]: http://dev.vinux-project.org/sonic/
-
+[jdkserver]: https://docs.oracle.com/en/java/javase/21/docs/api/jdk.httpserver/module-summary.html
+[maven]: https://maven.apache.org/
+[junit]: https://junit.org/junit5/
+[capacitor]: https://capacitorjs.com/
+[media3]: https://developer.android.com/media/media3/exoplayer
+[core_splashscreen]: https://developer.android.com/develop/ui/views/launch/splash-screen
+[puppeteer]: https://pptr.dev/

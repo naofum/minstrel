@@ -46,15 +46,15 @@ RB.Config.Spinoff.Help.mail         = '';
 // public name and version strings
 RB.Config.Minstrel                  = {};
 RB.Config.Minstrel.publicName       = 'Minstrel';
-RB.Config.Minstrel.publicVersion    = '3.0.3';
+RB.Config.Minstrel.publicVersion    = '4.0.0';
 RB.Config.Minstrel.publicBuild      = '7fa72ad0';
-RB.Config.Minstrel.publicDate       = '2024-10-19';
+RB.Config.Minstrel.publicDate       = '2026-08-29';
 RB.Config.Minstrel.epubRSName       = 'Minstrel';
-RB.Config.Minstrel.epubRSVersion    = '3.0.3';
+RB.Config.Minstrel.epubRSVersion    = '4.0.0';
 
 // private version string
 // used for checking updates (change it at each release!)
-RB.Config.Minstrel.version          = '3.0.1.main.coding.005';
+RB.Config.Minstrel.version          = '4.0.0';
 
 
 
