@@ -173,7 +173,6 @@ $ npm test
 * `jquery-mobile-shim.js` - jQuery Mobile shim (this project, MIT)
 * `mini-spectrum.js` - color-picker shim (this project, MIT)
 * [Font Awesome][fontawesome] - OFL
-* [nativeDroid][nativedroid] theme (UI styling)
 
 ### Backend (`server/`)
 
@@ -377,7 +376,6 @@ Additional thanks from the original project:
 [sprintf]: https://github.com/alexei/sprintf.js
 [cssbeautify]: http://cssbeautify.com/
 [fontawesome]: http://fontawesome.io/
-[nativedroid]: http://nativedroid.godesign.ch/
 [open_dyslexic_font]: http://opendyslexic.org/
 [roboto]: http://www.google.com/fonts/specimen/Roboto
 [sil_ofl_fonts]: http://scripts.sil.org/OFL

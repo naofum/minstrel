@@ -630,9 +630,35 @@
         }
 
         var $h = $el.children('h1,h2,h3,h4,h5,h6').first();
-        var $content = $el.children('div').first();
-        if (!$h.length || !$content.length) {
+        if (!$h.length) {
             return;
+        }
+        // the collapsible content is everything after the heading.
+        // jQuery Mobile allows any content there; if it is not already a
+        // single <div>, wrap it into one so it can be collapsed/expanded.
+        var kids = [];
+        var child = $el[0].firstChild;
+        while (child) {
+            var next = child.nextSibling;
+            if ((child.nodeType === 1) && (child !== $h[0])) {
+                kids.push(child);
+            }
+            child = next;
+        }
+        if (kids.length === 0) {
+            return;
+        }
+        var $content;
+        if ((kids.length === 1) && (kids[0].tagName.toLowerCase() === 'div')) {
+            // single <div> content: use it as-is
+            $content = $(kids[0]);
+        } else {
+            var contentDiv = document.createElement('div');
+            $h[0].parentNode.insertBefore(contentDiv, kids[0]);
+            for (var i = 0; i < kids.length; i++) {
+                contentDiv.appendChild(kids[i]);
+            }
+            $content = $(contentDiv);
         }
 
         $h.addClass('ui-collapsible-heading ui-collapsible-heading-collapsed');
